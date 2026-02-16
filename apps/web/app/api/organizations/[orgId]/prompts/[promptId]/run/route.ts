@@ -36,7 +36,7 @@ export async function POST(request: Request, { params }: Params) {
   // Get competitors
   const { data: competitors } = await supabase
     .from('competitors')
-    .select('id, name')
+    .select('id, name, website')
     .eq('organization_id', orgId)
 
   // Get org platforms
@@ -76,6 +76,9 @@ export async function POST(request: Request, { params }: Params) {
         brand_mentioned: metrics.brand_mentioned,
         brand_mention_count: metrics.brand_mention_count,
         brand_sentiment: metrics.brand_sentiment,
+        brand_cited: metrics.brand_cited,
+        mentioned_competitors: metrics.mentioned_competitors,
+        organization_position: metrics.organization_position,
         competitor_mentions: metrics.competitor_mentions,
         response_length: metrics.response_length,
         visibility_score: metrics.visibility_score,

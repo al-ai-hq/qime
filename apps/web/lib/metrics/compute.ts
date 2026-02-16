@@ -3,20 +3,21 @@ import type { AIProviderResponse } from '@/lib/ai/types'
 interface Competitor {
   id: string
   name: string
+  website: string | null
 }
 
 interface MetricsResult {
   brand_mentioned: boolean
   brand_mention_count: number
   brand_sentiment: 'positive' | 'neutral' | 'negative' | null
+  brand_cited: boolean
+  mentioned_competitors: string[]
+  organization_position: number | null
   competitor_mentions: Record<string, number>
   cited_urls: { url: string; title?: string }[]
   response_length: number
   visibility_score: number
 }
-
-const POSITIVE_WORDS = ['best', 'leading', 'top', 'excellent', 'recommended', 'innovative', 'outstanding', 'reliable', 'great', 'superior']
-const NEGATIVE_WORDS = ['worst', 'poor', 'lacking', 'expensive', 'limited', 'outdated', 'disappointing', 'unreliable', 'bad', 'inferior']
 
 export function computeMetrics(
   response: AIProviderResponse,
@@ -31,8 +32,8 @@ export function computeMetrics(
   const brandMentionCount = countOccurrences(text, brandLower)
   const brandMentioned = brandMentionCount > 0
 
-  // Brand sentiment (simple keyword-based)
-  const brandSentiment = brandMentioned ? analyzeSentiment(text, brandLower) : null
+  // Brand sentiment (hardcoded neutral when mentioned, null otherwise)
+  const brandSentiment = brandMentioned ? 'neutral' as const : null
 
   // Competitor mentions
   const competitorMentions: Record<string, number> = {}
@@ -45,16 +46,26 @@ export function computeMetrics(
 
   // URL analysis
   const citedUrls = response.citedUrls
-  const brandUrlMentioned = brandWebsite
+  const brandCited = brandWebsite
     ? citedUrls.some(u => u.url.includes(new URL(brandWebsite).hostname))
     : false
 
-  // Visibility score (0-100)
+  // Mentioned competitors: ordered by first appearance in response text
+  const mentionedCompetitors = competitors
+    .map(c => ({ name: c.name, index: text.indexOf(c.name.toLowerCase()) }))
+    .filter(c => c.index !== -1)
+    .sort((a, b) => a.index - b.index)
+    .map(c => c.name)
+
+  // Organization position
+  const organizationPosition = computeOrganizationPosition(text, brandLower, brandMentioned, competitors)
+
+  // Visibility score (0-100) — kept for backward compat
   const visibilityScore = calculateVisibilityScore({
     brandMentioned,
     brandMentionCount,
     brandSentiment,
-    brandUrlMentioned,
+    brandUrlMentioned: brandCited,
     competitorCount: Object.keys(competitorMentions).length,
     totalCompetitors: competitors.length,
     citedUrlCount: citedUrls.length,
@@ -64,6 +75,9 @@ export function computeMetrics(
     brand_mentioned: brandMentioned,
     brand_mention_count: brandMentionCount,
     brand_sentiment: brandSentiment,
+    brand_cited: brandCited,
+    mentioned_competitors: mentionedCompetitors,
+    organization_position: organizationPosition,
     competitor_mentions: competitorMentions,
     cited_urls: citedUrls,
     response_length: response.text.length,
@@ -82,30 +96,37 @@ function countOccurrences(text: string, term: string): number {
   return count
 }
 
-function analyzeSentiment(text: string, brandTerm: string): 'positive' | 'neutral' | 'negative' {
-  // Look at words near the brand mention
-  const contextWindow = 100
-  let positiveScore = 0
-  let negativeScore = 0
+function computeOrganizationPosition(
+  text: string,
+  brandLower: string,
+  brandMentioned: boolean,
+  competitors: Competitor[]
+): number | null {
+  // Build list of all mentioned companies with first-occurrence index
+  const companies: { name: string; index: number }[] = []
 
-  let pos = 0
-  while ((pos = text.indexOf(brandTerm, pos)) !== -1) {
-    const start = Math.max(0, pos - contextWindow)
-    const end = Math.min(text.length, pos + brandTerm.length + contextWindow)
-    const context = text.slice(start, end)
-
-    for (const word of POSITIVE_WORDS) {
-      if (context.includes(word)) positiveScore++
-    }
-    for (const word of NEGATIVE_WORDS) {
-      if (context.includes(word)) negativeScore++
-    }
-    pos += brandTerm.length
+  if (brandMentioned) {
+    companies.push({ name: brandLower, index: text.indexOf(brandLower) })
   }
 
-  if (positiveScore > negativeScore) return 'positive'
-  if (negativeScore > positiveScore) return 'negative'
-  return 'neutral'
+  for (const competitor of competitors) {
+    const idx = text.indexOf(competitor.name.toLowerCase())
+    if (idx !== -1) {
+      companies.push({ name: competitor.name.toLowerCase(), index: idx })
+    }
+  }
+
+  // Need at least 2 companies and brand must be mentioned
+  if (companies.length < 2 || !brandMentioned) return null
+
+  // Sort by first-occurrence index
+  companies.sort((a, b) => a.index - b.index)
+
+  const rank = companies.findIndex(c => c.name === brandLower)
+  const n = companies.length
+
+  // position = 1.0 - 0.75 * (rank / (n - 1))
+  return 1.0 - 0.75 * (rank / (n - 1))
 }
 
 function calculateVisibilityScore(params: {

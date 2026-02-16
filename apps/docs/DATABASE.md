@@ -179,6 +179,9 @@ Stores each AI query execution result.
 | competitor_mentions | jsonb | default '{}', {competitor_id: count} |
 | response_length | int, nullable | |
 | visibility_score | numeric, nullable | 0-100 |
+| brand_cited | bool, not null | default false; brand domain in cited URLs |
+| mentioned_competitors | jsonb, not null | default '[]'; competitor names by first appearance |
+| organization_position | numeric, nullable | 0.0–1.0; brand rank among mentioned companies |
 | run_duration_ms | int, nullable | |
 | error | text, nullable | |
 | created_at | timestamptz | |

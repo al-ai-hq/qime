@@ -26,7 +26,10 @@ vi.mock('@/lib/metrics/compute', () => ({
   computeMetrics: vi.fn(() => ({
     brand_mentioned: true,
     brand_mention_count: 2,
-    brand_sentiment: 'positive',
+    brand_sentiment: 'neutral',
+    brand_cited: false,
+    mentioned_competitors: [],
+    organization_position: null,
     competitor_mentions: {},
     cited_urls: [{ url: 'https://example.com', title: 'Test Source' }],
     response_length: 95,
