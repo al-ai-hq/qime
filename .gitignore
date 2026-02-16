@@ -1,0 +1,97 @@
+# ============================================================
+# Reusable  .gitignore
+# FastAPI + Postgres + Alembic + Docker + VSCode + Mac/Win/Linux
+# ============================================================
+
+# --- Python basics ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.pdb
+*.so
+*.dll
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+ENV/
+.conda/
+.python-version
+
+# --- IDE / Editors ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*.iml
+
+# --- OS junk ---
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# --- Bytecode cache for tools ---
+.cache/
+.pytest_cache/
+.mypy_cache/
+ruff_cache/
+__pypackages__/
+pip-wheel-metadata/
+
+# --- Logs & local outputs ---
+*.log
+*.out
+*.err
+logs/
+out/
+tmp/
+*.bak
+*.tmp
+
+# --- Environment / secrets ---
+.env
+.
+/*.egg-info/
+*.egg-info/dependency_links.txt
+*.egg-info/PKG-INFO
+*.egg-info/SOURCES.txt
+*.egg-info/top_level.txt
+*.egg-info/requires.txt
+.coverage
+
+.gradio/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+
+/.cursor/
+.git-token
+.mcp.json
