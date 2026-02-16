@@ -95,3 +95,4 @@ dist-ssr
 /.cursor/
 .git-token
 .mcp.json
+/.claude/
