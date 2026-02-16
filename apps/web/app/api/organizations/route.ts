@@ -1,15 +1,20 @@
 import { NextResponse } from 'next/server'
 import { createOrganizationSchema } from '@/lib/validators'
 import { jsonError, getAuthenticatedUser, validateBody } from '@/lib/api/helpers'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function POST(request: Request) {
   const { data, error: validationError } = await validateBody(request, createOrganizationSchema)
   if (validationError || !data) return jsonError(validationError!, 400)
 
-  const { user, supabase, error: authError } = await getAuthenticatedUser()
+  const { user, error: authError } = await getAuthenticatedUser()
   if (authError || !user) return jsonError('Unauthorized', 401)
 
-  const { data: org, error: insertError } = await supabase
+  // Use admin client to bypass RLS for org creation (user can't be a member
+  // of an org that doesn't exist yet, so the RLS policy would block this)
+  const admin = createAdminClient()
+
+  const { data: org, error: insertError } = await admin
     .from('organizations')
     .insert({ ...data, created_by: user.id })
     .select()
@@ -17,7 +22,7 @@ export async function POST(request: Request) {
 
   if (insertError) return jsonError(insertError.message, 500)
 
-  const { error: memberError } = await supabase
+  const { error: memberError } = await admin
     .from('organization_members')
     .insert({
       organization_id: org.id,
@@ -27,7 +32,7 @@ export async function POST(request: Request) {
 
   if (memberError) return jsonError(memberError.message, 500)
 
-  return NextResponse.json(org, { status: 201 })
+  return NextResponse.json({ organization: org }, { status: 201 })
 }
 
 export async function GET() {

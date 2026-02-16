@@ -8,8 +8,17 @@ const mockSupabase = {
   from: vi.fn(),
 }
 
+// Mock the admin client (used for org creation to bypass RLS)
+const mockAdminSupabase = {
+  from: vi.fn(),
+}
+
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(async () => mockSupabase),
+}))
+
+vi.mock('@/lib/supabase/admin', () => ({
+  createAdminClient: vi.fn(() => mockAdminSupabase),
 }))
 
 import { POST, GET } from '@/app/api/organizations/route'
@@ -58,7 +67,7 @@ describe('Organizations API', () => {
       const singleMock = vi.fn().mockResolvedValue({ data: mockOrg, error: null })
       const memberInsertMock = vi.fn().mockResolvedValue({ data: null, error: null })
 
-      mockSupabase.from.mockImplementation((table: string) => {
+      mockAdminSupabase.from.mockImplementation((table: string) => {
         if (table === 'organizations') {
           return { insert: insertMock, select: selectMock, single: singleMock }
         }
@@ -77,7 +86,7 @@ describe('Organizations API', () => {
       const json = await response.json()
 
       expect(response.status).toBe(201)
-      expect(json).toEqual(mockOrg)
+      expect(json).toEqual({ organization: mockOrg })
       expect(memberInsertMock).toHaveBeenCalledWith({
         organization_id: 'org-123',
         user_id: mockUser.id,
