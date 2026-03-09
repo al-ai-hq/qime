@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { addPlatformSchema } from '@/lib/validators'
 import { jsonError, getAuthenticatedUser, validateBody, checkOrgMembership } from '@/lib/api/helpers'
 
@@ -54,7 +54,7 @@ export async function GET(
 }
 
 export async function DELETE(
-  request: NextRequest,
+  request: Request,
   { params }: { params: Promise<{ orgId: string }> }
 ) {
   const { orgId } = await params
@@ -65,14 +65,14 @@ export async function DELETE(
   const membership = await checkOrgMembership(supabase, orgId, user.id)
   if (!membership) return jsonError('Forbidden', 403)
 
-  const platformId = request.nextUrl.searchParams.get('platform_id')
-  if (!platformId) return jsonError('platform_id is required', 400)
+  const { data, error: validationError } = await validateBody(request, addPlatformSchema)
+  if (validationError || !data) return jsonError(validationError!, 400)
 
   const { error } = await supabase
     .from('organization_platforms')
     .delete()
     .eq('organization_id', orgId)
-    .eq('platform_id', platformId)
+    .eq('platform_id', data.platform_id)
 
   if (error) return jsonError(error.message, 500)
 

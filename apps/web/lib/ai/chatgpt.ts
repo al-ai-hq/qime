@@ -12,7 +12,7 @@ export class ChatGPTProvider implements AIProvider {
     const start = Date.now()
     try {
       const response = await this.client.responses.create({
-        model: 'gpt-5.2',
+        model: 'gpt-5.4',
         tools: [{ type: 'web_search' }],
         input: request.prompt,
       })

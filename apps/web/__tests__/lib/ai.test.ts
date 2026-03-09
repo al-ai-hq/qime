@@ -2,6 +2,17 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { getProvider } from '@/lib/ai/index'
 import { StubProvider } from '@/lib/ai/stub'
 
+const mockGenerateContent = vi.fn()
+
+vi.mock('@google/genai', () => {
+  return {
+    GoogleGenAI: class {
+      models = { generateContent: mockGenerateContent }
+      constructor(public config: { apiKey: string }) {}
+    },
+  }
+})
+
 describe('getProvider', () => {
   const originalEnv = process.env.USE_AI_STUBS
 
@@ -79,5 +90,79 @@ describe('StubProvider', () => {
     expect(chatgptResponse.text.length).toBeGreaterThan(0)
     expect(geminiResponse.text.length).toBeGreaterThan(0)
     expect(perplexityResponse.text.length).toBeGreaterThan(0)
+  })
+})
+
+describe('GeminiProvider', () => {
+  let originalStubs: string | undefined
+  let originalApiKey: string | undefined
+
+  beforeEach(() => {
+    originalStubs = process.env.USE_AI_STUBS
+    originalApiKey = process.env.GOOGLE_AI_API_KEY
+    delete process.env.USE_AI_STUBS
+    process.env.GOOGLE_AI_API_KEY = 'test-api-key'
+  })
+
+  afterEach(() => {
+    if (originalStubs !== undefined) {
+      process.env.USE_AI_STUBS = originalStubs
+    } else {
+      delete process.env.USE_AI_STUBS
+    }
+    if (originalApiKey !== undefined) {
+      process.env.GOOGLE_AI_API_KEY = originalApiKey
+    } else {
+      delete process.env.GOOGLE_AI_API_KEY
+    }
+    vi.restoreAllMocks()
+  })
+
+  it('instantiates GoogleGenAI with apiKey object and calls models.generateContent', async () => {
+    mockGenerateContent.mockResolvedValue({
+      text: 'Gemini response text',
+      candidates: [{
+        groundingMetadata: {
+          groundingChunks: [
+            { web: { uri: 'https://example.com', title: 'Example' } },
+          ],
+        },
+      }],
+    })
+
+    const { GeminiProvider } = await import('@/lib/ai/gemini')
+    const provider = new GeminiProvider()
+    const result = await provider.query({ prompt: 'test prompt', platformId: 'gemini' })
+
+    // Verify models.generateContent called with correct params
+    expect(mockGenerateContent).toHaveBeenCalledWith({
+      model: 'gemini-3-flash-preview',
+      contents: 'test prompt',
+      config: {
+        tools: [{ googleSearch: {} }],
+      },
+    })
+
+    // Verify response.text is used as a property (not a method call)
+    expect(result.text).toBe('Gemini response text')
+
+    // Verify grounding metadata extraction
+    expect(result.citedUrls).toEqual([
+      { url: 'https://example.com', title: 'Example' },
+    ])
+    expect(typeof result.durationMs).toBe('number')
+    expect(result.error).toBeUndefined()
+  })
+
+  it('handles errors gracefully', async () => {
+    mockGenerateContent.mockRejectedValue(new Error('API failure'))
+
+    const { GeminiProvider } = await import('@/lib/ai/gemini')
+    const provider = new GeminiProvider()
+    const result = await provider.query({ prompt: 'test', platformId: 'gemini' })
+
+    expect(result.text).toBe('')
+    expect(result.citedUrls).toEqual([])
+    expect(result.error).toBe('API failure')
   })
 })
