@@ -3,12 +3,22 @@ import { getProvider } from '@/lib/ai/index'
 import { StubProvider } from '@/lib/ai/stub'
 
 const mockGenerateContent = vi.fn()
+const mockPerplexityCreate = vi.fn()
 
 vi.mock('@google/genai', () => {
   return {
     GoogleGenAI: class {
       models = { generateContent: mockGenerateContent }
       constructor(public config: { apiKey: string }) {}
+    },
+  }
+})
+
+vi.mock('@perplexity-ai/perplexity_ai', () => {
+  return {
+    default: class {
+      chat = { completions: { create: mockPerplexityCreate } }
+      constructor(public config: { apiKey?: string }) {}
     },
   }
 })
@@ -164,5 +174,80 @@ describe('GeminiProvider', () => {
     expect(result.text).toBe('')
     expect(result.citedUrls).toEqual([])
     expect(result.error).toBe('API failure')
+  })
+})
+
+describe('PerplexityProvider', () => {
+  let originalStubs: string | undefined
+  let originalApiKey: string | undefined
+
+  beforeEach(() => {
+    originalStubs = process.env.USE_AI_STUBS
+    originalApiKey = process.env.PERPLEXITY_API_KEY
+    delete process.env.USE_AI_STUBS
+    process.env.PERPLEXITY_API_KEY = 'test-api-key'
+  })
+
+  afterEach(() => {
+    if (originalStubs !== undefined) {
+      process.env.USE_AI_STUBS = originalStubs
+    } else {
+      delete process.env.USE_AI_STUBS
+    }
+    if (originalApiKey !== undefined) {
+      process.env.PERPLEXITY_API_KEY = originalApiKey
+    } else {
+      delete process.env.PERPLEXITY_API_KEY
+    }
+    vi.restoreAllMocks()
+  })
+
+  it('calls chat.completions.create with sonar-pro model and returns response', async () => {
+    mockPerplexityCreate.mockResolvedValue({
+      choices: [{ message: { content: 'Perplexity response text' } }],
+      citations: ['https://example.com', 'https://docs.example.com'],
+    })
+
+    const { PerplexityProvider } = await import('@/lib/ai/perplexity')
+    const provider = new PerplexityProvider()
+    const result = await provider.query({ prompt: 'test prompt', platformId: 'perplexity' })
+
+    expect(mockPerplexityCreate).toHaveBeenCalledWith({
+      model: 'sonar-pro',
+      messages: [{ role: 'user', content: 'test prompt' }],
+    })
+
+    expect(result.text).toBe('Perplexity response text')
+    expect(result.citedUrls).toEqual([
+      { url: 'https://example.com' },
+      { url: 'https://docs.example.com' },
+    ])
+    expect(typeof result.durationMs).toBe('number')
+    expect(result.error).toBeUndefined()
+  })
+
+  it('handles responses without citations', async () => {
+    mockPerplexityCreate.mockResolvedValue({
+      choices: [{ message: { content: 'Response without citations' } }],
+    })
+
+    const { PerplexityProvider } = await import('@/lib/ai/perplexity')
+    const provider = new PerplexityProvider()
+    const result = await provider.query({ prompt: 'test', platformId: 'perplexity' })
+
+    expect(result.text).toBe('Response without citations')
+    expect(result.citedUrls).toEqual([])
+  })
+
+  it('handles errors gracefully', async () => {
+    mockPerplexityCreate.mockRejectedValue(new Error('Perplexity API failure'))
+
+    const { PerplexityProvider } = await import('@/lib/ai/perplexity')
+    const provider = new PerplexityProvider()
+    const result = await provider.query({ prompt: 'test', platformId: 'perplexity' })
+
+    expect(result.text).toBe('')
+    expect(result.citedUrls).toEqual([])
+    expect(result.error).toBe('Perplexity API failure')
   })
 })
