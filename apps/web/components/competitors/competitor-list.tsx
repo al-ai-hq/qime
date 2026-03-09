@@ -87,6 +87,7 @@ export function CompetitorList({ competitors, orgId }: { competitors: Competitor
         <TableHeader>
           <TableRow>
             <TableHead>Name</TableHead>
+            <TableHead>Alternate names</TableHead>
             <TableHead>Website</TableHead>
             <TableHead className="w-24" />
           </TableRow>
@@ -95,6 +96,11 @@ export function CompetitorList({ competitors, orgId }: { competitors: Competitor
           {competitors.map((c) => (
             <TableRow key={c.id}>
               <TableCell className="font-medium">{c.name}</TableCell>
+              <TableCell className="text-muted-foreground">
+                {c.alternate_names && c.alternate_names.length > 0
+                  ? c.alternate_names.join(', ')
+                  : '--'}
+              </TableCell>
               <TableCell className="text-muted-foreground">{c.website || '--'}</TableCell>
               <TableCell>
                 <div className="flex gap-1">

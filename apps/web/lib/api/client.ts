@@ -86,7 +86,7 @@ export const api = {
   competitors: {
     list: (orgId: string) =>
       request<{ competitors: Competitor[] }>(`/api/organizations/${orgId}/competitors`),
-    create: (orgId: string, body: { name: string; website?: string }) =>
+    create: (orgId: string, body: { name: string; alternate_names?: string[]; website?: string }) =>
       request<{ competitor: Competitor }>(`/api/organizations/${orgId}/competitors`, {
         method: 'POST',
         body: JSON.stringify(body),
