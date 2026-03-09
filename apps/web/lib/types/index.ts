@@ -7,6 +7,7 @@ export interface User {
 export interface Organization {
   id: string
   name: string
+  alternate_names?: string[]
   website?: string
   description?: string
   timezone: string
@@ -41,6 +42,7 @@ export interface Competitor {
   id: string
   organization_id: string
   name: string
+  alternate_names?: string[]
   website?: string
   created_at: string
 }

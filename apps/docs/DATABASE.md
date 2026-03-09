@@ -48,6 +48,7 @@ Extends Supabase auth.users. Auto-created via trigger on signup.
 |--------|------|-------|
 | id | uuid, PK | auto-generated |
 | name | text, not null | |
+| alternate_names | text[], not null | default '{}'; name variants for multi-language detection |
 | website | text, nullable | |
 | description | text, nullable | |
 | timezone | text | default 'UTC' |
@@ -97,6 +98,7 @@ Unique constraint: (organization_id, platform_id)
 | id | uuid, PK | |
 | organization_id | uuid | FK organizations |
 | name | text, not null | |
+| alternate_names | text[], not null | default '{}'; name variants for multi-language detection |
 | website | text, nullable | |
 | logo_url | text, nullable | |
 | created_at | timestamptz | |

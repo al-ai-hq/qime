@@ -261,6 +261,112 @@ describe('computeMetrics', () => {
     })
   })
 
+  describe('alternate name detection', () => {
+    const competitorsWithAltNames = [
+      { id: 'comp-1', name: 'Rival Inc', alternate_names: ['ライバル社'], website: 'https://rivalinc.com' },
+      { id: 'comp-2', name: 'Contender Co', alternate_names: ['컨텐더'], website: null },
+    ]
+
+    it('detects brand via alternate name', () => {
+      const result = computeMetrics(
+        makeResponse('삼성은 좋은 회사입니다'),
+        'Samsung',
+        brandWebsite,
+        competitors,
+        ['삼성']
+      )
+      expect(result.brand_mentioned).toBe(true)
+      expect(result.brand_mention_count).toBe(1)
+    })
+
+    it('aggregates brand mention count across primary and alternate names', () => {
+      const result = computeMetrics(
+        makeResponse('Samsung is great. 삼성은 최고입니다.'),
+        'Samsung',
+        brandWebsite,
+        competitors,
+        ['삼성']
+      )
+      expect(result.brand_mentioned).toBe(true)
+      expect(result.brand_mention_count).toBe(2)
+    })
+
+    it('detects competitor via alternate name', () => {
+      const result = computeMetrics(
+        makeResponse('ライバル社は競合です'),
+        brand,
+        brandWebsite,
+        competitorsWithAltNames
+      )
+      expect(result.competitor_mentions['comp-1']).toBe(1)
+    })
+
+    it('aggregates competitor mentions across primary and alternate names', () => {
+      const result = computeMetrics(
+        makeResponse('Rival Inc is a competitor. ライバル社も競合です.'),
+        brand,
+        brandWebsite,
+        competitorsWithAltNames
+      )
+      expect(result.competitor_mentions['comp-1']).toBe(2)
+    })
+
+    it('orders mentioned competitors by earliest name variant appearance', () => {
+      const result = computeMetrics(
+        makeResponse('First 컨텐더 appears, then Rival Inc shows up'),
+        brand,
+        brandWebsite,
+        competitorsWithAltNames
+      )
+      expect(result.mentioned_competitors).toEqual(['Contender Co', 'Rival Inc'])
+    })
+
+    it('uses alternate name for organization position when it appears first', () => {
+      const result = computeMetrics(
+        makeResponse('삼성 leads the market. Rival Inc follows.'),
+        'Samsung',
+        brandWebsite,
+        competitorsWithAltNames,
+        ['삼성']
+      )
+      expect(result.organization_position).toBe(1.0)
+    })
+
+    it('works with empty alternate names (backward compatibility)', () => {
+      const result = computeMetrics(
+        makeResponse('Acme is great'),
+        brand,
+        brandWebsite,
+        competitors,
+        []
+      )
+      expect(result.brand_mentioned).toBe(true)
+      expect(result.brand_mention_count).toBe(1)
+    })
+
+    it('works without alternate names parameter (backward compatibility)', () => {
+      const result = computeMetrics(
+        makeResponse('Acme is great'),
+        brand,
+        brandWebsite,
+        competitors
+      )
+      expect(result.brand_mentioned).toBe(true)
+    })
+
+    it('deduplicates brand name variants', () => {
+      const result = computeMetrics(
+        makeResponse('Samsung is great'),
+        'Samsung',
+        brandWebsite,
+        competitors,
+        ['Samsung', 'samsung']
+      )
+      // Should count "samsung" once, not multiple times due to duplicates
+      expect(result.brand_mention_count).toBe(1)
+    })
+  })
+
   describe('empty response handling', () => {
     it('handles empty text', () => {
       const result = computeMetrics(makeResponse(''), brand, brandWebsite, competitors)

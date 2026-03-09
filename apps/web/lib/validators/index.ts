@@ -15,6 +15,7 @@ export const loginSchema = z.object({
 // Organizations
 export const createOrganizationSchema = z.object({
   name: z.string().min(1).max(200),
+  alternate_names: z.array(z.string().min(1).max(200)).max(20).optional(),
   website: z.string().url().optional().or(z.literal('')),
   description: z.string().max(1000).optional(),
   timezone: z.string().default('UTC'),
@@ -22,6 +23,7 @@ export const createOrganizationSchema = z.object({
 
 export const updateOrganizationSchema = z.object({
   name: z.string().min(1).max(200).optional(),
+  alternate_names: z.array(z.string().min(1).max(200)).max(20).optional(),
   website: z.string().url().optional().or(z.literal('')),
   description: z.string().max(1000).optional(),
   timezone: z.string().optional(),
@@ -40,11 +42,13 @@ export const addPlatformSchema = z.object({
 // Competitors
 export const createCompetitorSchema = z.object({
   name: z.string().min(1).max(200),
+  alternate_names: z.array(z.string().min(1).max(200)).max(20).optional(),
   website: z.string().url().optional().or(z.literal('')),
 })
 
 export const updateCompetitorSchema = z.object({
   name: z.string().min(1).max(200).optional(),
+  alternate_names: z.array(z.string().min(1).max(200)).max(20).optional(),
   website: z.string().url().optional().or(z.literal('')),
 })
 

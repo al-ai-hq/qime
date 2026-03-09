@@ -36,7 +36,7 @@ export async function POST(request: Request, { params }: Params) {
   // Get competitors
   const { data: competitors } = await supabase
     .from('competitors')
-    .select('id, name, website')
+    .select('id, name, alternate_names, website')
     .eq('organization_id', orgId)
 
   // Get org platforms
@@ -62,7 +62,8 @@ export async function POST(request: Request, { params }: Params) {
       response,
       org.name,
       org.website,
-      competitors ?? []
+      competitors ?? [],
+      org.alternate_names ?? []
     )
 
     const { data: run, error: runError } = await supabase

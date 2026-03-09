@@ -3,6 +3,7 @@ import type { AIProviderResponse } from '@/lib/ai/types'
 interface Competitor {
   id: string
   name: string
+  alternate_names?: string[]
   website: string | null
 }
 
@@ -23,22 +24,36 @@ export function computeMetrics(
   response: AIProviderResponse,
   brandName: string,
   brandWebsite: string | null,
-  competitors: Competitor[]
+  competitors: Competitor[],
+  brandAlternateNames: string[] = []
 ): MetricsResult {
   const text = response.text.toLowerCase()
-  const brandLower = brandName.toLowerCase()
 
-  // Brand mentions
-  const brandMentionCount = countOccurrences(text, brandLower)
+  // Build deduplicated list of all brand name variants (dedup after lowercasing)
+  const allBrandNames = [...new Set(
+    [brandName, ...brandAlternateNames].map(n => n.toLowerCase())
+  )].filter(n => n.length > 0)
+
+  // Brand mentions — sum across all name variants
+  let brandMentionCount = 0
+  for (const name of allBrandNames) {
+    brandMentionCount += countOccurrences(text, name)
+  }
   const brandMentioned = brandMentionCount > 0
 
   // Brand sentiment (hardcoded neutral when mentioned, null otherwise)
   const brandSentiment = brandMentioned ? 'neutral' as const : null
 
-  // Competitor mentions
+  // Competitor mentions — sum across primary + alternate names
   const competitorMentions: Record<string, number> = {}
   for (const competitor of competitors) {
-    const count = countOccurrences(text, competitor.name.toLowerCase())
+    const allNames = [...new Set(
+      [competitor.name, ...(competitor.alternate_names ?? [])].map(n => n.toLowerCase())
+    )].filter(n => n.length > 0)
+    let count = 0
+    for (const name of allNames) {
+      count += countOccurrences(text, name)
+    }
     if (count > 0) {
       competitorMentions[competitor.id] = count
     }
@@ -50,15 +65,23 @@ export function computeMetrics(
     ? citedUrls.some(u => u.url.includes(new URL(brandWebsite).hostname))
     : false
 
-  // Mentioned competitors: ordered by first appearance in response text
+  // Mentioned competitors: ordered by earliest first appearance across all name variants
   const mentionedCompetitors = competitors
-    .map(c => ({ name: c.name, index: text.indexOf(c.name.toLowerCase()) }))
+    .map(c => {
+      const allNames = [c.name, ...(c.alternate_names ?? [])]
+        .map(n => n.toLowerCase())
+      const indices = allNames
+        .map(n => text.indexOf(n))
+        .filter(i => i !== -1)
+      const earliestIndex = indices.length > 0 ? Math.min(...indices) : -1
+      return { name: c.name, index: earliestIndex }
+    })
     .filter(c => c.index !== -1)
     .sort((a, b) => a.index - b.index)
     .map(c => c.name)
 
   // Organization position
-  const organizationPosition = computeOrganizationPosition(text, brandLower, brandMentioned, competitors)
+  const organizationPosition = computeOrganizationPosition(text, allBrandNames, brandMentioned, competitors)
 
   // Visibility score (0-100) — kept for backward compat
   const visibilityScore = calculateVisibilityScore({
@@ -98,21 +121,26 @@ function countOccurrences(text: string, term: string): number {
 
 function computeOrganizationPosition(
   text: string,
-  brandLower: string,
+  allBrandNames: string[],
   brandMentioned: boolean,
   competitors: Competitor[]
 ): number | null {
   // Build list of all mentioned companies with first-occurrence index
-  const companies: { name: string; index: number }[] = []
+  const companies: { isBrand: boolean; index: number }[] = []
 
   if (brandMentioned) {
-    companies.push({ name: brandLower, index: text.indexOf(brandLower) })
+    const brandIndices = allBrandNames.map(n => text.indexOf(n)).filter(i => i !== -1)
+    if (brandIndices.length > 0) {
+      companies.push({ isBrand: true, index: Math.min(...brandIndices) })
+    }
   }
 
   for (const competitor of competitors) {
-    const idx = text.indexOf(competitor.name.toLowerCase())
-    if (idx !== -1) {
-      companies.push({ name: competitor.name.toLowerCase(), index: idx })
+    const allNames = [competitor.name, ...(competitor.alternate_names ?? [])]
+      .map(n => n.toLowerCase())
+    const indices = allNames.map(n => text.indexOf(n)).filter(i => i !== -1)
+    if (indices.length > 0) {
+      companies.push({ isBrand: false, index: Math.min(...indices) })
     }
   }
 
@@ -122,7 +150,7 @@ function computeOrganizationPosition(
   // Sort by first-occurrence index
   companies.sort((a, b) => a.index - b.index)
 
-  const rank = companies.findIndex(c => c.name === brandLower)
+  const rank = companies.findIndex(c => c.isBrand)
   const n = companies.length
 
   // position = 1.0 - 0.75 * (rank / (n - 1))
