@@ -41,6 +41,16 @@ export default async function PromptDetailPage({
     .order('created_at', { ascending: false })
     .limit(50)
 
+  const { data: competitors } = await supabase
+    .from('competitors')
+    .select('id, name')
+    .eq('organization_id', orgId)
+
+  const competitorMap: Record<string, string> = {}
+  for (const c of competitors ?? []) {
+    competitorMap[c.id] = c.name
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -97,7 +107,7 @@ export default async function PromptDetailPage({
         </CardContent>
       </Card>
 
-      <PromptRunTable runs={runs ?? []} />
+      <PromptRunTable runs={runs ?? []} competitorMap={competitorMap} />
     </div>
   )
 }

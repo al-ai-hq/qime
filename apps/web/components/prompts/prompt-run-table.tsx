@@ -15,7 +15,7 @@ import {
 import { PromptRunDetail } from '@/components/prompts/prompt-run-detail'
 import type { PromptRun } from '@/lib/types'
 
-export function PromptRunTable({ runs }: { runs: PromptRun[] }) {
+export function PromptRunTable({ runs, competitorMap }: { runs: PromptRun[]; competitorMap: Record<string, string> }) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   return (
@@ -63,7 +63,7 @@ export function PromptRunTable({ runs }: { runs: PromptRun[] }) {
                   {expandedId === run.id && (
                     <TableRow key={`${run.id}-detail`}>
                       <TableCell colSpan={6} className="p-0">
-                        <PromptRunDetail run={run} />
+                        <PromptRunDetail run={run} competitorMap={competitorMap} />
                       </TableCell>
                     </TableRow>
                   )}

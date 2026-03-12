@@ -2,7 +2,7 @@ import type { PromptRun } from '@/lib/types'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
-export function PromptRunDetail({ run }: { run: PromptRun }) {
+export function PromptRunDetail({ run, competitorMap }: { run: PromptRun; competitorMap: Record<string, string> }) {
   return (
     <div className="space-y-3 bg-muted/50 p-4 text-sm">
       <div>
@@ -36,9 +36,9 @@ export function PromptRunDetail({ run }: { run: PromptRun }) {
         <div>
           <span className="font-medium">Competitor mentions:</span>
           <div className="mt-1 flex flex-wrap gap-2">
-            {Object.entries(run.competitor_mentions).map(([name, count]) => (
-              <span key={name} className="rounded bg-muted px-2 py-0.5 text-xs">
-                {name}: {count}
+            {Object.entries(run.competitor_mentions).map(([id, count]) => (
+              <span key={id} className="rounded bg-muted px-2 py-0.5 text-xs">
+                {competitorMap[id] ?? id}: {count}
               </span>
             ))}
           </div>
