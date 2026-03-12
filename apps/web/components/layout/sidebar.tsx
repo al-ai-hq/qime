@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, MessageSquare, Users, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Logo } from '@/components/shared/logo'
 
 const navItems = (orgId: string) => [
   { href: `/${orgId}`, label: 'Dashboard', icon: Home },
@@ -13,13 +12,13 @@ const navItems = (orgId: string) => [
   { href: `/${orgId}/settings`, label: 'Settings', icon: Settings },
 ]
 
-export function Sidebar({ orgId, className }: { orgId: string; className?: string }) {
+export function Sidebar({ orgId, orgName, className }: { orgId: string; orgName: string; className?: string }) {
   const pathname = usePathname()
 
   return (
     <aside className={cn('w-56 flex-col border-r bg-card', className)}>
       <div className="flex h-14 items-center border-b px-4">
-        <Logo linkTo={`/${orgId}`} className="text-xl" />
+        <Link href={`/${orgId}`} className="text-xl font-bold tracking-tight text-primary truncate">{orgName}</Link>
       </div>
       <nav className="flex-1 space-y-1 p-3">
         {navItems(orgId).map((item) => {

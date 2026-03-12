@@ -40,7 +40,7 @@ export default async function OrgLayout({
   return (
     <OrgProvider org={org}>
       <div className="flex h-screen">
-        <Sidebar orgId={orgId} className="hidden md:flex" />
+        <Sidebar orgId={orgId} orgName={org.name} className="hidden md:flex" />
         <div className="flex flex-1 flex-col overflow-hidden">
           <TopBar orgName={org.name} userEmail={user.email!} />
           <main className="flex-1 overflow-y-auto p-6">
