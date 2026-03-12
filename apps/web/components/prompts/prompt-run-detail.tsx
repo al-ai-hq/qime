@@ -1,13 +1,17 @@
 import type { PromptRun } from '@/lib/types'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 export function PromptRunDetail({ run }: { run: PromptRun }) {
   return (
     <div className="space-y-3 bg-muted/50 p-4 text-sm">
       <div>
         <span className="font-medium">Response:</span>
-        <p className="mt-1 max-h-48 overflow-y-auto whitespace-pre-wrap text-muted-foreground" dir="auto">
-          {run.response_text}
-        </p>
+        <div className="mt-1 max-h-48 overflow-y-auto rounded border border-gray-300 bg-gray-50 p-3 text-black prose prose-sm max-w-none" dir="auto">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {run.response_text}
+          </ReactMarkdown>
+        </div>
       </div>
       {run.cited_urls && run.cited_urls.length > 0 && (
         <div>
