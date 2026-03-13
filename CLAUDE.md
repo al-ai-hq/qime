@@ -8,14 +8,14 @@ Qime is a platform that helps brands monitor, measure, and improve their visibil
 
 ## Repository Structure
 
-Monorepo with apps under `apps/`:
-- `apps/web/` — Main Next.js 16 web application (React 19, TypeScript, Tailwind CSS v4)
-- `apps/docs/` — Documentation (`API.md`, `DATABASE.md`)
+Next.js 16 web application (React 19, TypeScript, Tailwind CSS v4) at the project root.
 
-### Web App Structure (`apps/web/`)
+- `docs/` — Documentation (`API.md`, `DATABASE.md`, `METRICS.md`)
+- `migrations/` — Database migrations
+
+### Project Structure
 
 ```
-apps/web/
 ├── app/
 │   ├── api/
 │   │   ├── auth/              # signup, login, logout, confirm routes
@@ -50,10 +50,7 @@ apps/web/
 
 ## Development Commands
 
-All commands run from `apps/web/`:
-
 ```bash
-cd apps/web
 npm run dev          # Start dev server (localhost:3000)
 npm run build        # Production build (includes TypeScript check)
 npm start            # Start production server
@@ -68,7 +65,7 @@ npx vitest run __tests__/lib/metrics.test.ts   # Run a specific test file
 **Every development task MUST include tests. A task is NOT considered complete until all tests pass.**
 
 - **Test framework**: Vitest (configured in `vitest.config.ts`)
-- **Test location**: `apps/web/__tests__/` mirroring the source structure
+- **Test location**: `__tests__/` mirroring the source structure
   - `__tests__/lib/` — Unit tests for library code (metrics, scheduling, AI providers, validators)
   - `__tests__/api/` — Integration tests for API routes (mock Supabase client, call handlers directly)
 - **Setup file**: `__tests__/setup.ts` — Sets test env vars and mocks `next/headers`
@@ -78,7 +75,7 @@ npx vitest run __tests__/lib/metrics.test.ts   # Run a specific test file
 
 ## Architecture
 
-- **Next.js App Router** with file-based routing under `apps/web/app/`
+- **Next.js App Router** with file-based routing under `app/`
 - **TypeScript** with strict mode enabled; path alias `@/*` maps to project root
 - **Tailwind CSS v4** via `@tailwindcss/postcss`
 - **Supabase** for database (PostgreSQL), auth, and RLS — clients in `lib/supabase/`

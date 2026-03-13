@@ -1,9 +1,31 @@
-# ============================================================
-# Reusable  .gitignore
-# FastAPI + Postgres + Alembic + Docker + VSCode + Mac/Win/Linux
-# ============================================================
+# --- Dependencies ---
+node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
-# --- Python basics ---
+# --- Next.js ---
+/.next/
+/out/
+/build
+/coverage
+
+# --- Environment / secrets ---
+.env*
+*.pem
+
+# --- TypeScript ---
+*.tsbuildinfo
+next-env.d.ts
+
+# --- Vercel ---
+.vercel
+
+# --- Python (legacy) ---
 __pycache__/
 *.py[cod]
 *$py.class
@@ -12,21 +34,33 @@ __pycache__/
 *.pdb
 *.so
 *.dll
-
-# --- Virtual environments ---
 .venv/
 venv/
 env/
 ENV/
 .conda/
 .python-version
+.pytest_cache/
+.mypy_cache/
+ruff_cache/
+__pypackages__/
+pip-wheel-metadata/
+*.egg-info/
+.coverage
+.gradio/
 
 # --- IDE / Editors ---
 .vscode/
+!.vscode/extensions.json
 .idea/
 *.swp
 *.swo
 *.iml
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
 # --- OS junk ---
 .DS_Store
@@ -35,61 +69,26 @@ ehthumbs.db
 desktop.ini
 $RECYCLE.BIN/
 
-# --- Bytecode cache for tools ---
-.cache/
-.pytest_cache/
-.mypy_cache/
-ruff_cache/
-__pypackages__/
-pip-wheel-metadata/
-
-# --- Logs & local outputs ---
+# --- Logs ---
 *.log
 *.out
 *.err
 logs/
-out/
-tmp/
-*.bak
-*.tmp
-
-# --- Environment / secrets ---
-.env
-.
-/*.egg-info/
-*.egg-info/dependency_links.txt
-*.egg-info/PKG-INFO
-*.egg-info/SOURCES.txt
-*.egg-info/top_level.txt
-*.egg-info/requires.txt
-.coverage
-
-.gradio/
-
-# Logs
-logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# --- Misc ---
+tmp/
+*.bak
+*.tmp
+dist/
+dist-ssr/
+.cache/
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-
+# --- Project ---
 /.cursor/
 .git-token
 .mcp.json
