@@ -1,5 +1,6 @@
+import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { cookies } from 'next/headers'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -7,36 +8,63 @@ export async function GET(request: Request) {
   const type = searchParams.get('type') as 'signup' | 'email' | 'invite' | null
   const code = searchParams.get('code')
 
-  const supabase = await createClient()
+  const cookieStore = await cookies()
+  let responseCookies: Array<{ name: string; value: string; options: Record<string, unknown> }> = []
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll()
+        },
+        setAll(cookiesToSet) {
+          responseCookies = [...responseCookies, ...cookiesToSet]
+          cookiesToSet.forEach(({ name, value, options }) => {
+            try { cookieStore.set(name, value, options) } catch {}
+          })
+        },
+      },
+    }
+  )
+
+  let redirectTo = '/'
+  let hasError = false
 
   // PKCE flow: exchange code for session (used by inviteUserByEmail redirect)
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (error) {
-      return NextResponse.redirect(new URL('/auth/error', request.url))
+      redirectTo = '/auth/error'
+      hasError = true
+    } else if (type === 'invite') {
+      redirectTo = '/set-password'
     }
-    // If type=invite was passed as a query param alongside the code, redirect to set-password
-    if (type === 'invite') {
-      return NextResponse.redirect(new URL('/set-password', request.url))
+  } else if (token_hash && type) {
+    // OTP flow: verify token_hash (used by copy-link invite links)
+    const { error } = await supabase.auth.verifyOtp({ token_hash, type })
+    if (error) {
+      redirectTo = '/auth/error'
+      hasError = true
+    } else if (type === 'invite') {
+      redirectTo = '/set-password'
     }
-    return NextResponse.redirect(new URL('/', request.url))
+  } else {
+    redirectTo = '/auth/error'
+    hasError = true
   }
 
-  // OTP flow: verify token_hash (used by copy-link invite links)
-  if (!token_hash || !type) {
-    return NextResponse.redirect(new URL('/auth/error', request.url))
+  const response = NextResponse.redirect(new URL(redirectTo, request.url))
+
+  // Explicitly set session cookies on the redirect response so the browser
+  // receives them — cookies set via cookieStore.set() may not propagate
+  // to NextResponse.redirect() in Route Handlers.
+  if (!hasError) {
+    responseCookies.forEach(({ name, value, options }) => {
+      response.cookies.set(name, value, options)
+    })
   }
 
-  const { error } = await supabase.auth.verifyOtp({ token_hash, type })
-
-  if (error) {
-    return NextResponse.redirect(new URL('/auth/error', request.url))
-  }
-
-  // Invited users need to set a password before they can use their account
-  if (type === 'invite') {
-    return NextResponse.redirect(new URL('/set-password', request.url))
-  }
-
-  return NextResponse.redirect(new URL('/', request.url))
+  return response
 }
