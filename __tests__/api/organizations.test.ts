@@ -31,16 +31,23 @@ function createRequest(method: string, body?: unknown) {
   })
 }
 
-const mockUser = {
+const mockAdminUser = {
   id: 'test-user-id',
-  email: 'test@example.com',
+  email: 'admin@example.com',
   aud: 'authenticated',
   role: 'authenticated',
 }
 
-function mockAuthenticated() {
+const mockRegularUser = {
+  id: 'regular-user-id',
+  email: 'user@example.com',
+  aud: 'authenticated',
+  role: 'authenticated',
+}
+
+function mockAuthenticated(user = mockAdminUser) {
   mockSupabase.auth.getUser.mockResolvedValue({
-    data: { user: mockUser },
+    data: { user },
     error: null,
   })
 }
@@ -52,24 +59,37 @@ function mockUnauthenticated() {
   })
 }
 
+function mockOrgCount(count: number) {
+  const selectMock = vi.fn().mockResolvedValue({ count, error: null })
+  mockAdminSupabase.from.mockImplementation((table: string) => {
+    if (table === 'organizations') {
+      return { select: selectMock }
+    }
+    return {}
+  })
+  return selectMock
+}
+
 describe('Organizations API', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    process.env.ADMIN_EMAIL = 'admin@example.com'
   })
 
   describe('POST /api/organizations', () => {
     it('creates an organization and adds owner membership', async () => {
       mockAuthenticated()
 
-      const mockOrg = { id: 'org-123', name: 'Test Org', created_by: mockUser.id }
+      const mockOrg = { id: 'org-123', name: 'Test Org', created_by: mockAdminUser.id }
       const insertMock = vi.fn().mockReturnThis()
       const selectMock = vi.fn().mockReturnThis()
       const singleMock = vi.fn().mockResolvedValue({ data: mockOrg, error: null })
       const memberInsertMock = vi.fn().mockResolvedValue({ data: null, error: null })
+      const countSelectMock = vi.fn().mockResolvedValue({ count: 0, error: null })
 
       mockAdminSupabase.from.mockImplementation((table: string) => {
         if (table === 'organizations') {
-          return { insert: insertMock, select: selectMock, single: singleMock }
+          return { insert: insertMock, select: countSelectMock }
         }
         if (table === 'organization_members') {
           return { insert: memberInsertMock }
@@ -89,7 +109,7 @@ describe('Organizations API', () => {
       expect(json).toEqual({ organization: mockOrg })
       expect(memberInsertMock).toHaveBeenCalledWith({
         organization_id: 'org-123',
-        user_id: mockUser.id,
+        user_id: mockAdminUser.id,
         role: 'owner',
       })
     })
@@ -110,6 +130,35 @@ describe('Organizations API', () => {
       const response = await POST(request)
 
       expect(response.status).toBe(400)
+    })
+
+    it('returns 403 for non-admin user', async () => {
+      mockAuthenticated(mockRegularUser)
+
+      const request = createRequest('POST', { name: 'Test Org' })
+      const response = await POST(request)
+      const json = await response.json()
+
+      expect(response.status).toBe(403)
+      expect(json.error).toBe('Only the admin can create organizations')
+    })
+
+    it('returns 409 when org already exists', async () => {
+      mockAuthenticated()
+
+      mockAdminSupabase.from.mockImplementation((table: string) => {
+        if (table === 'organizations') {
+          return { select: vi.fn().mockResolvedValue({ count: 1, error: null }) }
+        }
+        return {}
+      })
+
+      const request = createRequest('POST', { name: 'Second Org' })
+      const response = await POST(request)
+      const json = await response.json()
+
+      expect(response.status).toBe(409)
+      expect(json.error).toBe('An organization already exists')
     })
   })
 

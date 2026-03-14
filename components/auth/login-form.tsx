@@ -1,8 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { toast } from 'sonner'
 import { api } from '@/lib/api/client'
 import { Button } from '@/components/ui/button'
@@ -10,7 +8,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 export function LoginForm() {
-  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -20,8 +17,7 @@ export function LoginForm() {
     setLoading(true)
     try {
       await api.auth.login({ email, password })
-      router.push('/orgs')
-      router.refresh()
+      window.location.href = '/orgs'
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Login failed')
     } finally {
@@ -56,10 +52,7 @@ export function LoginForm() {
         {loading ? 'Logging in...' : 'Log in'}
       </Button>
       <p className="text-center text-sm text-muted-foreground">
-        No account?{' '}
-        <Link href="/signup" className="font-medium text-primary hover:underline">
-          Sign up
-        </Link>
+        Contact your administrator for access.
       </p>
     </form>
   )

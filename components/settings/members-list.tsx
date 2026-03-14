@@ -58,6 +58,9 @@ export function MembersList({ orgId, members }: { orgId: string; members: Organi
             Invite
           </Button>
         </form>
+        <p className="text-xs text-muted-foreground">
+          The user will be created automatically and can set their password via the reset password flow.
+        </p>
         <Table>
           <TableHeader>
             <TableRow>

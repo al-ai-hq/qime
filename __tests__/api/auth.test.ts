@@ -11,8 +11,21 @@ const mockSupabase = {
   from: vi.fn(),
 }
 
+const mockAdminSupabase = {
+  auth: {
+    admin: {
+      listUsers: vi.fn(),
+    },
+  },
+  from: vi.fn(),
+}
+
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(async () => mockSupabase),
+}))
+
+vi.mock('@/lib/supabase/admin', () => ({
+  createAdminClient: vi.fn(() => mockAdminSupabase),
 }))
 
 import { POST as signupPOST } from '@/app/api/auth/signup/route'
@@ -29,35 +42,69 @@ function createRequest(body: unknown) {
 describe('Auth API', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    process.env.ADMIN_EMAIL = 'admin@example.com'
   })
 
   describe('POST /api/auth/signup', () => {
-    it('returns 201 on valid signup', async () => {
+    it('returns 201 on valid admin signup', async () => {
+      mockAdminSupabase.auth.admin.listUsers.mockResolvedValue({
+        data: { users: [] },
+        error: null,
+      })
+
       mockSupabase.auth.signUp.mockResolvedValue({
         data: {
-          user: { id: 'new-user-id', email: 'new@example.com' },
+          user: { id: 'new-user-id', email: 'admin@example.com' },
           session: null,
         },
         error: null,
       })
 
       const request = createRequest({
-        email: 'new@example.com',
+        email: 'admin@example.com',
         password: 'password123',
-        full_name: 'New User',
+        full_name: 'Admin User',
       })
 
       const response = await signupPOST(request)
       const json = await response.json()
 
       expect(response.status).toBe(201)
-      expect(json.user).toEqual({ id: 'new-user-id', email: 'new@example.com' })
+      expect(json.user).toEqual({ id: 'new-user-id', email: 'admin@example.com' })
       expect(json.message).toContain('confirmation')
-      expect(mockSupabase.auth.signUp).toHaveBeenCalledWith({
-        email: 'new@example.com',
+    })
+
+    it('returns 403 for non-admin email', async () => {
+      const request = createRequest({
+        email: 'user@example.com',
         password: 'password123',
-        options: { data: { full_name: 'New User' } },
+        full_name: 'Regular User',
       })
+
+      const response = await signupPOST(request)
+      const json = await response.json()
+
+      expect(response.status).toBe(403)
+      expect(json.error).toBe('Signup is disabled')
+    })
+
+    it('returns 403 when admin already exists', async () => {
+      mockAdminSupabase.auth.admin.listUsers.mockResolvedValue({
+        data: { users: [{ id: 'existing-admin', email: 'admin@example.com' }] },
+        error: null,
+      })
+
+      const request = createRequest({
+        email: 'admin@example.com',
+        password: 'password123',
+        full_name: 'Admin User',
+      })
+
+      const response = await signupPOST(request)
+      const json = await response.json()
+
+      expect(response.status).toBe(403)
+      expect(json.error).toBe('Admin account already exists')
     })
 
     it('returns 400 for missing email', async () => {
@@ -74,7 +121,7 @@ describe('Auth API', () => {
 
     it('returns 400 for short password', async () => {
       const request = createRequest({
-        email: 'test@example.com',
+        email: 'admin@example.com',
         password: 'short',
       })
 
@@ -86,13 +133,18 @@ describe('Auth API', () => {
     })
 
     it('returns error when Supabase signup fails', async () => {
+      mockAdminSupabase.auth.admin.listUsers.mockResolvedValue({
+        data: { users: [] },
+        error: null,
+      })
+
       mockSupabase.auth.signUp.mockResolvedValue({
         data: { user: null, session: null },
         error: { message: 'User already registered', status: 422 },
       })
 
       const request = createRequest({
-        email: 'existing@example.com',
+        email: 'admin@example.com',
         password: 'password123',
       })
 

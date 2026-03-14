@@ -28,10 +28,17 @@ export async function POST(
 
   // Find user by email
   const { data: { users } } = await admin.auth.admin.listUsers()
-  const targetUser = users?.find((u) => u.email === body.email)
+  let targetUser = users?.find((u) => u.email === body.email)
 
+  // Auto-create user if not found
   if (!targetUser) {
-    return jsonError('No user found with that email', 404)
+    const { data: newUser, error: createError } = await admin.auth.admin.createUser({
+      email: body.email,
+      email_confirm: true,
+    })
+
+    if (createError) return jsonError(createError.message, 500)
+    targetUser = newUser.user
   }
 
   // Check if already a member
