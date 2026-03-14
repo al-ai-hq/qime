@@ -5,7 +5,13 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 const inviteSchema = z.object({
   email: z.string().email(),
+  mode: z.enum(['send_email', 'copy_link']),
 })
+
+function buildInviteLink(request: Request, hashedToken: string): string {
+  const origin = new URL(request.url).origin
+  return `${origin}/api/auth/confirm?token_hash=${encodeURIComponent(hashedToken)}&type=invite`
+}
 
 export async function POST(
   request: Request,
@@ -26,12 +32,52 @@ export async function POST(
 
   const admin = createAdminClient()
 
-  // Find user by email
+  // Find existing user by email
   const { data: { users } } = await admin.auth.admin.listUsers()
-  const targetUser = users?.find((u) => u.email === body.email)
+  const existingUser = users?.find((u) => u.email === body.email)
 
-  if (!targetUser) {
-    return jsonError('No user found with that email', 404)
+  let targetUserId: string
+  let inviteLink: string | undefined
+
+  if (existingUser) {
+    targetUserId = existingUser.id
+
+    // If user is pending (never signed in), re-invite them
+    if (!existingUser.last_sign_in_at) {
+      if (body.mode === 'send_email') {
+        await admin.auth.admin.inviteUserByEmail(body.email, {
+          redirectTo: `${new URL(request.url).origin}/api/auth/confirm?type=invite`,
+        })
+      } else {
+        const { data: linkData } = await admin.auth.admin.generateLink({
+          type: 'invite',
+          email: body.email,
+        })
+        if (linkData?.properties?.hashed_token) {
+          inviteLink = buildInviteLink(request, linkData.properties.hashed_token)
+        }
+      }
+    }
+    // If user is active, just add them to the org (no invite needed)
+  } else {
+    // New user — invite or generate link
+    if (body.mode === 'send_email') {
+      const { data: inviteData, error: inviteError } = await admin.auth.admin.inviteUserByEmail(body.email, {
+        redirectTo: `${new URL(request.url).origin}/api/auth/confirm?type=invite`,
+      })
+      if (inviteError) return jsonError(inviteError.message, 500)
+      targetUserId = inviteData.user.id
+    } else {
+      const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
+        type: 'invite',
+        email: body.email,
+      })
+      if (linkError) return jsonError(linkError.message, 500)
+      targetUserId = linkData.user.id
+      if (linkData.properties?.hashed_token) {
+        inviteLink = buildInviteLink(request, linkData.properties.hashed_token)
+      }
+    }
   }
 
   // Check if already a member
@@ -39,7 +85,7 @@ export async function POST(
     .from('organization_members')
     .select('id')
     .eq('organization_id', orgId)
-    .eq('user_id', targetUser.id)
+    .eq('user_id', targetUserId)
     .single()
 
   if (existing) return jsonError('User is already a member', 409)
@@ -48,7 +94,7 @@ export async function POST(
     .from('organization_members')
     .insert({
       organization_id: orgId,
-      user_id: targetUser.id,
+      user_id: targetUserId,
       role: 'member',
     })
     .select()
@@ -56,5 +102,5 @@ export async function POST(
 
   if (insertError) return jsonError(insertError.message, 500)
 
-  return NextResponse.json({ member }, { status: 201 })
+  return NextResponse.json({ member, invite_link: inviteLink }, { status: 201 })
 }

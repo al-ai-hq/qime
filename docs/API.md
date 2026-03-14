@@ -8,9 +8,11 @@ All endpoints (except auth) require authentication via Supabase session cookies.
 
 ## Authentication
 
+> **Single-tenant mode**: Signup is restricted to the admin email configured via the `ADMIN_EMAIL` environment variable. Regular users are created automatically when invited by the admin.
+
 ### POST /api/auth/signup
 
-Create a new account.
+Create the admin account (one-time bootstrap). Returns 403 if the email does not match `ADMIN_EMAIL` or if the admin already exists.
 
 **Request Body:**
 ```json
@@ -70,7 +72,7 @@ Email confirmation callback. Redirects to `/` on success, `/auth/error` on failu
 
 ### POST /api/organizations
 
-Create a new organization. The creator is automatically added as owner.
+Create the organization (admin only, single-tenant — only one org allowed). The creator is automatically added as owner. Returns 403 for non-admin users and 409 if an organization already exists.
 
 **Request Body:**
 ```json

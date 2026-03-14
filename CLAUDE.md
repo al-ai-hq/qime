@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Qime is a platform that helps brands monitor, measure, and improve their visibility in AI-powered search engines and chatbots (ChatGPT, Perplexity, Gemini, Google AI Overviews/SGE).
+Qime is a single-tenant platform that helps brands monitor, measure, and improve their visibility in AI-powered search engines and chatbots (ChatGPT, Perplexity, Gemini, Google AI Overviews/SGE). Each deployment serves one organization. The admin is identified by the `ADMIN_EMAIL` env var, sets up the org on first login, and invites users. No self-signup.
 
 ## Repository Structure
 
@@ -84,6 +84,7 @@ npx vitest run __tests__/lib/metrics.test.ts   # Run a specific test file
 - **Scheduling**: pg_cron + Supabase Edge Function (`run-scheduled-prompts`) every 15 minutes
 - **ESLint** flat config with `next/core-web-vitals` and `next/typescript` rules
 - **Package manager**: npm
+- **Single-tenant**: `ADMIN_EMAIL` env var identifies the admin; signup restricted to admin bootstrap; org creation limited to one org
 
 ## Key Conventions
 

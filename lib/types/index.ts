@@ -23,6 +23,7 @@ export interface OrganizationMember {
   created_at: string
   user_email?: string
   full_name?: string
+  status?: 'active' | 'pending'
 }
 
 export interface AIPlatform {

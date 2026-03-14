@@ -2,17 +2,16 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { toast } from 'sonner'
 import { api } from '@/lib/api/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-export function SignupForm() {
+export function SignupForm({ adminEmail }: { adminEmail?: string }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(adminEmail ?? '')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
 
@@ -50,6 +49,9 @@ export function SignupForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          readOnly={!!adminEmail}
+          disabled={!!adminEmail}
+          className={adminEmail ? 'bg-muted' : ''}
         />
       </div>
       <div className="space-y-2">
@@ -65,13 +67,10 @@ export function SignupForm() {
         />
       </div>
       <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? 'Creating account...' : 'Create account'}
+        {loading ? 'Creating account...' : 'Create admin account'}
       </Button>
       <p className="text-center text-sm text-muted-foreground">
-        Already have an account?{' '}
-        <Link href="/login" className="font-medium text-primary hover:underline">
-          Log in
-        </Link>
+        Initial admin setup — only the configured admin email can register.
       </p>
     </form>
   )

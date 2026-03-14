@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createOrganizationSchema } from '@/lib/validators'
 import { jsonError, getAuthenticatedUser, validateBody } from '@/lib/api/helpers'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { isAdmin } from '@/lib/tenant'
 
 export async function POST(request: Request) {
   const { data, error: validationError } = await validateBody(request, createOrganizationSchema)
@@ -10,9 +11,21 @@ export async function POST(request: Request) {
   const { user, error: authError } = await getAuthenticatedUser()
   if (authError || !user) return jsonError('Unauthorized', 401)
 
-  // Use admin client to bypass RLS for org creation (user can't be a member
-  // of an org that doesn't exist yet, so the RLS policy would block this)
+  // Only admin can create organizations
+  if (!isAdmin(user.email!)) {
+    return jsonError('Only the admin can create organizations', 403)
+  }
+
   const admin = createAdminClient()
+
+  // Only one organization allowed in single-tenant mode
+  const { count } = await admin
+    .from('organizations')
+    .select('id', { count: 'exact', head: true })
+
+  if (count && count > 0) {
+    return jsonError('An organization already exists', 409)
+  }
 
   const { data: org, error: insertError } = await admin
     .from('organizations')

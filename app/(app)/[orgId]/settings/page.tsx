@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { PageHeader } from '@/components/layout/page-header'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { OrgDetailsForm } from '@/components/settings/org-details-form'
@@ -34,6 +35,20 @@ export default async function SettingsPage({
     supabase.from('organization_members').select('id, user_id, role, created_at').eq('organization_id', orgId),
   ])
 
+  // Enrich members with email and status from auth.users
+  const admin = createAdminClient()
+  const enrichedMembers = await Promise.all(
+    (members ?? []).map(async (m) => {
+      const { data: { user: authUser } } = await admin.auth.admin.getUserById(m.user_id)
+      return {
+        ...m,
+        user_email: authUser?.email ?? null,
+        full_name: authUser?.user_metadata?.full_name ?? null,
+        status: authUser?.last_sign_in_at ? 'active' as const : 'pending' as const,
+      }
+    })
+  )
+
   return (
     <div className="space-y-6">
       <PageHeader title="Settings" />
@@ -65,7 +80,7 @@ export default async function SettingsPage({
           <TagsManager orgId={orgId} tags={tags ?? []} />
         </TabsContent>
         <TabsContent value="members" className="mt-6">
-          <MembersList orgId={orgId} members={(members ?? []) as unknown as import('@/lib/types').OrganizationMember[]} />
+          <MembersList orgId={orgId} members={enrichedMembers as import('@/lib/types').OrganizationMember[]} />
         </TabsContent>
       </Tabs>
     </div>
