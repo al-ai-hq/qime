@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getAuthenticatedUser, checkOrgMembership, jsonError } from '@/lib/api/helpers'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function GET(
   request: Request,
@@ -20,5 +21,19 @@ export async function GET(
 
   if (dbError) return jsonError(dbError.message, 500)
 
-  return NextResponse.json({ members })
+  const admin = createAdminClient()
+
+  const enriched = await Promise.all(
+    (members ?? []).map(async (m) => {
+      const { data: { user: authUser } } = await admin.auth.admin.getUserById(m.user_id)
+      return {
+        ...m,
+        user_email: authUser?.email ?? null,
+        full_name: authUser?.user_metadata?.full_name ?? null,
+        status: authUser?.last_sign_in_at ? 'active' as const : 'pending' as const,
+      }
+    })
+  )
+
+  return NextResponse.json({ members: enriched })
 }

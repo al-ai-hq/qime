@@ -30,6 +30,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Authenticated users hitting auth pages or landing page: smart redirect
+  // (except /set-password which requires an active session)
   if (user && (pathname === '/login' || pathname === '/signup' || pathname === '/')) {
     const { data: memberships } = await supabase
       .from('organization_members')
@@ -66,6 +67,7 @@ export async function middleware(request: NextRequest) {
   const isProtectedRoute = pathname.startsWith('/orgs')
     || pathname.startsWith('/setup')
     || pathname.startsWith('/no-access')
+    || pathname.startsWith('/set-password')
     || pathname.match(/^\/[a-zA-Z0-9-]+\/(prompts|competitors|settings)/)
   if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone()

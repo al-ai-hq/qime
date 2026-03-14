@@ -195,10 +195,19 @@ export const api = {
   members: {
     list: (orgId: string) =>
       request<{ members: OrganizationMember[] }>(`/api/organizations/${orgId}/members`),
-    invite: (orgId: string, email: string) =>
-      request<{ member: OrganizationMember }>(`/api/organizations/${orgId}/members/invite`, {
+    invite: (orgId: string, email: string, mode: 'send_email' | 'copy_link') =>
+      request<{ member: OrganizationMember; invite_link?: string }>(`/api/organizations/${orgId}/members/invite`, {
         method: 'POST',
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, mode }),
+      }),
+    remove: (orgId: string, memberId: string) =>
+      request<void>(`/api/organizations/${orgId}/members/${memberId}`, {
+        method: 'DELETE',
+      }),
+    resend: (orgId: string, memberId: string, mode: 'send_email' | 'copy_link') =>
+      request<{ invite_link?: string }>(`/api/organizations/${orgId}/members/${memberId}/resend`, {
+        method: 'POST',
+        body: JSON.stringify({ mode }),
       }),
   },
 }
