@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/layout/page-header'
 import { PromptList } from '@/components/prompts/prompt-list'
+import { RunAllButton } from '@/components/prompts/run-all-button'
 
 export const metadata = { title: 'Prompts - Qime' }
 
@@ -26,13 +27,16 @@ export default async function PromptsPage({
         title="Prompts"
         description="Manage the prompts used to monitor your AI visibility."
         action={
-          <Link
-            href={`/${orgId}/prompts/new`}
-            className="inline-flex h-9 items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-          >
-            <Plus className="h-4 w-4" />
-            New prompt
-          </Link>
+          <div className="flex items-center gap-2">
+            <RunAllButton orgId={orgId} prompts={prompts ?? []} />
+            <Link
+              href={`/${orgId}/prompts/new`}
+              className="inline-flex h-9 items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            >
+              <Plus className="h-4 w-4" />
+              New prompt
+            </Link>
+          </div>
         }
       />
       <PromptList prompts={prompts ?? []} orgId={orgId} />
