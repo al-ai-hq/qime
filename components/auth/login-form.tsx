@@ -49,10 +49,10 @@ export function LoginForm() {
         />
       </div>
       <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? 'Logging in...' : 'Log in'}
+        {loading ? 'Signing in...' : 'Sign in'}
       </Button>
-      <p className="text-center text-sm text-muted-foreground">
-        Contact your administrator for access.
+      <p className="text-xs text-[var(--text-hint)] text-center mt-4">
+        Contact your administrator for access
       </p>
     </form>
   )

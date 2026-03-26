@@ -51,7 +51,7 @@ export function SignupForm({ adminEmail }: { adminEmail?: string }) {
           required
           readOnly={!!adminEmail}
           disabled={!!adminEmail}
-          className={adminEmail ? 'bg-muted' : ''}
+          className={adminEmail ? 'text-[var(--text-muted)]' : ''}
         />
       </div>
       <div className="space-y-2">
@@ -67,11 +67,8 @@ export function SignupForm({ adminEmail }: { adminEmail?: string }) {
         />
       </div>
       <Button type="submit" className="w-full" disabled={loading}>
-        {loading ? 'Creating account...' : 'Create admin account'}
+        {loading ? 'Creating account...' : 'Create account'}
       </Button>
-      <p className="text-center text-sm text-muted-foreground">
-        Initial admin setup — only the configured admin email can register.
-      </p>
     </form>
   )
 }
