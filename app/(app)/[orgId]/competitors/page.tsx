@@ -20,10 +20,6 @@ export default async function CompetitorsPage({
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Competitors"
-        description="Track competitors to see how they compare in AI responses."
-      />
       <CompetitorList competitors={competitors ?? []} orgId={orgId} />
     </div>
   )

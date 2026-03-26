@@ -93,7 +93,9 @@ export function CompetitorForm({ open, onOpenChange, orgId, competitor }: Compet
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="comp-name">Name</Label>
+            <Label htmlFor="comp-name" className="text-[var(--text-body)]">
+              Name
+            </Label>
             <Input
               id="comp-name"
               value={name}
@@ -104,7 +106,9 @@ export function CompetitorForm({ open, onOpenChange, orgId, competitor }: Compet
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="comp-website">Website</Label>
+            <Label htmlFor="comp-website" className="text-[var(--text-body)]">
+              Website
+            </Label>
             <Input
               id="comp-website"
               type="url"
@@ -114,8 +118,10 @@ export function CompetitorForm({ open, onOpenChange, orgId, competitor }: Compet
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="comp-alt-name">Alternate names</Label>
-            <p className="text-sm text-muted-foreground">
+            <Label htmlFor="comp-alt-name" className="text-[var(--text-body)]">
+              Alternate names
+            </Label>
+            <p className="text-sm text-[var(--text-muted)]">
               Name in other languages for AI response detection
             </p>
             <div className="flex gap-2">
@@ -141,13 +147,13 @@ export function CompetitorForm({ open, onOpenChange, orgId, competitor }: Compet
                 {alternateNames.map((altName, i) => (
                   <span
                     key={i}
-                    className="flex items-center gap-1 rounded-full border px-3 py-1 text-sm"
+                    className="flex items-center gap-1 rounded-md bg-[var(--accent-muted)] px-2 py-0.5 text-xs text-[var(--text-body)]"
                   >
                     {altName}
                     <button
                       type="button"
                       onClick={() => removeAlternateName(i)}
-                      className="text-muted-foreground hover:text-foreground"
+                      className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -157,7 +163,7 @@ export function CompetitorForm({ open, onOpenChange, orgId, competitor }: Compet
             )}
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
