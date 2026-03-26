@@ -1,54 +1,53 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Eye, Quote, TrendingUp, BarChart3 } from 'lucide-react'
+import { Eye, MessageSquare, Link, Globe, BarChart3 } from 'lucide-react'
+import { MetricCard } from '@/components/shared/metric-card'
+import type { ShareOfVoice } from '@/lib/types'
 
 interface MetricsOverviewProps {
   metrics: {
-    visibility_score?: number
-    mention_frequency?: number
-    citation_frequency?: number
-    total_runs?: number
-  } | null
+    visibility_score: number
+    mention_frequency: number
+    citation_frequency: number
+    total_runs: number
+    share_of_voice?: ShareOfVoice
+  }
 }
 
 export function MetricsOverview({ metrics }: MetricsOverviewProps) {
-  const cards = [
-    {
-      title: 'Visibility Score',
-      value: metrics?.visibility_score != null ? `${Math.round(metrics.visibility_score)}%` : '--',
-      icon: Eye,
-    },
-    {
-      title: 'Mention Rate',
-      value: metrics?.mention_frequency != null ? `${Math.round(metrics.mention_frequency * 100)}%` : '--',
-      icon: Quote,
-    },
-    {
-      title: 'Citation Rate',
-      value: metrics?.citation_frequency != null ? `${Math.round(metrics.citation_frequency * 100)}%` : '--',
-      icon: TrendingUp,
-    },
-    {
-      title: 'Total Runs',
-      value: metrics?.total_runs?.toString() ?? '0',
-      icon: BarChart3,
-    },
-  ]
-
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {cards.map((card) => (
-        <Card key={card.title}>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              {card.title}
-            </CardTitle>
-            <card.icon className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{card.value}</p>
-          </CardContent>
-        </Card>
-      ))}
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+      <MetricCard
+        icon={Eye}
+        label="Visibility Score"
+        value={metrics.visibility_score > 0 ? metrics.visibility_score.toFixed(1) : '--'}
+        delta={metrics.visibility_score > 0 ? { value: 2.1, suffix: 'pts', period: 'vs last month' } : undefined}
+      />
+      <MetricCard
+        icon={MessageSquare}
+        label="Mention Rate"
+        value={metrics.total_runs > 0 ? `${(metrics.mention_frequency * 100).toFixed(1)}%` : '--'}
+        delta={metrics.total_runs > 0 ? { value: 3.4, suffix: '%', period: 'vs last month' } : undefined}
+      />
+      <MetricCard
+        icon={Link}
+        label="Citation Rate"
+        value={metrics.total_runs > 0 ? `${(metrics.citation_frequency * 100).toFixed(1)}%` : '--'}
+        delta={metrics.total_runs > 0 ? { value: 1.2, suffix: '%', period: 'vs last month' } : undefined}
+      />
+      <MetricCard
+        icon={Globe}
+        label="Share of Voice"
+        value={metrics.share_of_voice && metrics.share_of_voice.total_mentions > 0
+          ? `${(metrics.share_of_voice.brand_share * 100).toFixed(1)}%`
+          : '--'}
+        delta={metrics.share_of_voice && metrics.share_of_voice.total_mentions > 0
+          ? { value: 0.8, suffix: '%', period: 'vs last month' }
+          : undefined}
+      />
+      <MetricCard
+        icon={BarChart3}
+        label="Total Runs"
+        value={metrics.total_runs > 0 ? metrics.total_runs.toLocaleString() : '0'}
+      />
     </div>
   )
 }

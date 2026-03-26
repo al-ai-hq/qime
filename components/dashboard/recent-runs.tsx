@@ -1,15 +1,7 @@
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { PlatformBadge } from '@/components/shared/platform-badge'
 
 interface Run {
   id: string
@@ -23,54 +15,63 @@ interface Run {
 }
 
 export function RecentRuns({ runs, orgId }: { runs: Run[]; orgId: string }) {
+  if (runs.length === 0) {
+    return (
+      <div className="rounded-xl border border-[var(--border-primary)] bg-[var(--surface-card)] p-5">
+        <h3 className="mb-4 text-sm font-semibold text-[var(--text-secondary)]">Recent Runs</h3>
+        <p className="py-4 text-center text-sm text-[var(--text-muted)]">No runs yet.</p>
+      </div>
+    )
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Recent Runs</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {runs.length === 0 ? (
-          <p className="py-4 text-center text-sm text-muted-foreground">No runs yet.</p>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Prompt</TableHead>
-                <TableHead>Platform</TableHead>
-                <TableHead>Score</TableHead>
-                <TableHead>Mentioned</TableHead>
-                <TableHead>Cited</TableHead>
-                <TableHead>When</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {runs.map((run) => (
-                <TableRow key={run.id}>
-                  <TableCell>
-                    <Link
-                      href={`/${orgId}/prompts/${run.prompt_id}`}
-                      className="font-medium hover:underline"
-                    >
-                      {run.prompts?.title ?? 'Untitled'}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="capitalize">{run.platform_id}</TableCell>
-                  <TableCell>
-                    <Badge variant={run.visibility_score >= 50 ? 'default' : 'secondary'}>
-                      {Math.round(run.visibility_score)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{run.brand_mentioned ? 'Yes' : 'No'}</TableCell>
-                  <TableCell>{run.brand_cited ? 'Yes' : 'No'}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {formatDistanceToNow(new Date(run.created_at), { addSuffix: true })}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </CardContent>
-    </Card>
+    <div className="rounded-xl border border-[var(--border-primary)] bg-[var(--surface-card)] p-5">
+      <h3 className="mb-4 text-sm font-semibold text-[var(--text-secondary)]">Recent Runs</h3>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-[var(--border-subtle)]">
+              <th className="pb-2.5 text-left text-xs font-medium text-[var(--text-muted)]">Prompt</th>
+              <th className="pb-2.5 text-left text-xs font-medium text-[var(--text-muted)]">Platform</th>
+              <th className="pb-2.5 text-left text-xs font-medium text-[var(--text-muted)]">Score</th>
+              <th className="pb-2.5 text-left text-xs font-medium text-[var(--text-muted)]">Mentioned</th>
+              <th className="pb-2.5 text-left text-xs font-medium text-[var(--text-muted)]">Cited</th>
+              <th className="pb-2.5 text-left text-xs font-medium text-[var(--text-muted)]">When</th>
+            </tr>
+          </thead>
+          <tbody>
+            {runs.map((run) => (
+              <tr key={run.id} className="border-b border-[var(--border-subtle)] last:border-0 transition-colors hover:bg-[var(--surface-active)]">
+                <td className="py-2.5 pr-4">
+                  <Link
+                    href={`/${orgId}/prompts/${run.prompt_id}`}
+                    className="font-medium text-[var(--text-primary)] hover:text-[var(--accent-primary)]"
+                  >
+                    {run.prompts?.title ?? 'Untitled'}
+                  </Link>
+                </td>
+                <td className="py-2.5 pr-4">
+                  <PlatformBadge name={run.platform_id} />
+                </td>
+                <td className="py-2.5 pr-4">
+                  <Badge variant={run.visibility_score >= 50 ? 'default' : 'secondary'}>
+                    {Math.round(run.visibility_score)}
+                  </Badge>
+                </td>
+                <td className="py-2.5 pr-4 text-[var(--text-body)]">
+                  {run.brand_mentioned ? 'Yes' : 'No'}
+                </td>
+                <td className="py-2.5 pr-4 text-[var(--text-body)]">
+                  {run.brand_cited ? 'Yes' : 'No'}
+                </td>
+                <td className="py-2.5 text-[var(--text-muted)]">
+                  {formatDistanceToNow(new Date(run.created_at), { addSuffix: true })}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   )
 }
