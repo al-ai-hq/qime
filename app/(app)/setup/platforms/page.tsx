@@ -46,44 +46,55 @@ export default function SetupPlatformSelectPage() {
   }
 
   return (
-    <div className="mx-auto max-w-md px-4 py-16">
-      <h1 className="text-2xl font-semibold">Select AI platforms</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Choose which AI platforms to monitor for your brand.
-      </p>
-      <div className="mt-6 space-y-3">
-        {PLATFORMS.map((p) => (
-          <button
-            key={p.id}
-            type="button"
-            onClick={() => toggle(p.id)}
-            className={cn(
-              'w-full rounded-lg border p-4 text-left transition-colors',
-              selected.has(p.id)
-                ? 'border-primary bg-primary/5'
-                : 'hover:bg-accent'
-            )}
+    <div
+      className="flex min-h-screen flex-col items-center justify-center px-4"
+      style={{
+        background: 'var(--surface-page)',
+        backgroundImage: 'radial-gradient(circle at 50% 40%, rgba(240,82,42,0.04), transparent 60%)',
+      }}
+    >
+      <div className="w-full max-w-[560px] rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-card)] p-8">
+        <h1 className="text-xl font-semibold text-[var(--text-primary)]">Select AI platforms to monitor</h1>
+        <p className="mt-1 text-sm text-[var(--text-muted)]">
+          Choose which AI platforms to monitor for your brand.
+        </p>
+        <div className="mt-6 grid gap-3">
+          {PLATFORMS.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => toggle(p.id)}
+              className={cn(
+                'w-full rounded-xl border p-4 text-left transition-colors',
+                selected.has(p.id)
+                  ? 'border-l-2 border-l-[var(--accent-primary)] bg-[var(--accent-subtle)] border-[var(--border-primary)]'
+                  : 'border-[var(--border-primary)] bg-[var(--surface-card)] text-[var(--text-muted)] hover:bg-[var(--surface-overlay)]'
+              )}
+            >
+              <p className={cn(
+                'font-medium',
+                selected.has(p.id) ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'
+              )}>{p.name}</p>
+              <p className="text-sm text-[var(--text-muted)]">{p.description}</p>
+            </button>
+          ))}
+        </div>
+        <div className="mt-6 flex gap-3">
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => orgId && router.push(`/${orgId}`)}
           >
-            <p className="font-medium">{p.name}</p>
-            <p className="text-sm text-muted-foreground">{p.description}</p>
-          </button>
-        ))}
-      </div>
-      <div className="mt-6 flex gap-3">
-        <Button
-          variant="outline"
-          className="flex-1"
-          onClick={() => orgId && router.push(`/${orgId}`)}
-        >
-          Skip
-        </Button>
-        <Button
-          className="flex-1"
-          onClick={onSubmit}
-          disabled={selected.size === 0 || loading}
-        >
-          {loading ? 'Saving...' : 'Continue'}
-        </Button>
+            Skip
+          </Button>
+          <Button
+            className="flex-1"
+            onClick={onSubmit}
+            disabled={selected.size === 0 || loading}
+          >
+            {loading ? 'Saving...' : 'Complete Setup'}
+          </Button>
+        </div>
       </div>
     </div>
   )
