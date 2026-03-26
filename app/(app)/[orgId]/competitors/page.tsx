@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import { PageHeader } from '@/components/layout/page-header'
 import { CompetitorList } from '@/components/competitors/competitor-list'
 
 export const metadata = { title: 'Competitors - Qime' }
