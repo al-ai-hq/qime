@@ -104,12 +104,20 @@ export interface PromptRun {
   error?: string
 }
 
+export interface ShareOfVoice {
+  brand_share: number
+  competitor_shares: Record<string, number>
+  competitor_names: Record<string, string>
+  total_mentions: number
+}
+
 export interface AggregateMetrics {
   mention_frequency: number
   citation_frequency: number
   sentiment_score: number
   visibility_score: number
   total_runs: number
+  share_of_voice?: ShareOfVoice
 }
 
 export interface OrgSettings {

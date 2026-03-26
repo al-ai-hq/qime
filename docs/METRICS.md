@@ -125,6 +125,34 @@ visibility_score = 0.5 * mention_frequency + 0.3 * citation_frequency + 0.2 * se
 
 `integer` — Number of runs included in the aggregation.
 
+### share_of_voice
+
+`ShareOfVoice` object — The proportion of total AI mentions captured by each brand in the competitive set.
+
+**Calculation:**
+
+1. For each run, sum `brand_mention_count` (the brand's mentions) and each value in `competitor_mentions` (competitor mention counts).
+2. Aggregate across all runs in the filter window.
+3. Divide each brand's total mentions by the grand total.
+
+```
+brand_share = total_brand_mentions / (total_brand_mentions + sum(all_competitor_mentions))
+competitor_share[id] = total_competitor_mentions[id] / grand_total
+```
+
+**Response fields:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `brand_share` | number (0.0-1.0) | Brand's proportion of all mentions |
+| `competitor_shares` | Record<string, number> | Each competitor's share, keyed by ID |
+| `competitor_names` | Record<string, string> | Competitor ID to name mapping |
+| `total_mentions` | integer | Grand total of all brand + competitor mentions |
+
+Returns all zeros when no runs exist or no brands are mentioned.
+
+**Interpretation:** A `brand_share` of 0.38 means your brand captures 38% of all AI recommendations in your competitive set. Track this over time to measure whether your share is growing or shrinking relative to competitors.
+
 ---
 
 ## API Reference
@@ -152,7 +180,13 @@ Returns aggregate metrics for an organization's prompt runs.
     "citation_frequency": 0.33,
     "sentiment_score": 0.5,
     "visibility_score": 0.575,
-    "total_runs": 12
+    "total_runs": 12,
+    "share_of_voice": {
+      "brand_share": 0.45,
+      "competitor_shares": { "comp-1-uuid": 0.35, "comp-2-uuid": 0.20 },
+      "competitor_names": { "comp-1-uuid": "Competitor A", "comp-2-uuid": "Competitor B" },
+      "total_mentions": 47
+    }
   }
 }
 ```
@@ -163,4 +197,5 @@ Returns aggregate metrics for an organization's prompt runs.
 |------|-------------|
 | `apps/web/lib/metrics/compute.ts` | First-order metric computation |
 | `apps/web/lib/metrics/aggregate.ts` | Second-order metric aggregation |
+| `apps/web/lib/metrics/share-of-voice.ts` | Share of Voice computation |
 | `apps/web/app/api/organizations/[orgId]/metrics/route.ts` | Aggregate metrics endpoint |
