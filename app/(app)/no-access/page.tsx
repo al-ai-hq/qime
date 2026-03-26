@@ -23,7 +23,7 @@ export default function NoAccessPage() {
       }}
     >
       <div className="w-full max-w-[400px] rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-card)] p-8 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--surface-overlay)]">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--surface-active)]">
           <ShieldOff className="h-6 w-6 text-[var(--text-label)]" />
         </div>
         <h1 className="text-xl font-semibold text-[var(--text-primary)]">No Access</h1>

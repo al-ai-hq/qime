@@ -1,0 +1,644 @@
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: #1A1A1E; color: #F2F2F2; }
+
+  .dashboard-mockup {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+    background: #1A1A1E;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    background: #121214;
+    border-right: 1px solid #242428;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .sidebar-logo {
+    padding: 0 20px 24px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #F2F2F2;
+    letter-spacing: -0.5px;
+  }
+  .sidebar-logo span { color: #F0522A; }
+  .nav-group { margin-bottom: 24px; }
+  .nav-group-label {
+    padding: 0 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #70707A;
+    margin-bottom: 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 20px;
+    font-size: 14px;
+    color: #8A8A90;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.04); color: #D0D0D0; }
+  .nav-item.active {
+    background: #28282E;
+    color: #F2F2F2;
+    border-left: 2px solid #F0522A;
+    padding-left: 18px;
+  }
+  .nav-icon { width: 18px; height: 18px; opacity: 0.6; }
+  .nav-item.active .nav-icon { opacity: 1; }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 16px 20px;
+    border-top: 1px solid #242428;
+  }
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #2A2A2E;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: #A0A0A6;
+  }
+  .user-name { font-size: 13px; color: #D0D0D0; }
+  .user-email { font-size: 11px; color: #70707A; }
+
+  /* Main Content */
+  .main {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* Top Bar */
+  .topbar {
+    background: #121214;
+    border-bottom: 1px solid #303036;
+    padding: 0 28px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .page-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #F2F2F2;
+  }
+  .search-bar {
+    background: #1F1F24;
+    border: 1px solid #2A2A2E;
+    border-radius: 8px;
+    padding: 7px 14px;
+    color: #8A8A90;
+    font-size: 13px;
+    width: 260px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .date-range {
+    background: #1F1F24;
+    border: 1px solid #2A2A2E;
+    border-radius: 8px;
+    padding: 7px 14px;
+    color: #A0A0A6;
+    font-size: 13px;
+  }
+  .btn-primary {
+    background: #F0522A;
+    color: #F2F2F2;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Content Area */
+  .content {
+    padding: 28px;
+    flex: 1;
+  }
+
+  /* Metric Cards */
+  .metrics-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .metric-card {
+    background: #1F1F24;
+    border: 1px solid #2A2A2E;
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .metric-label {
+    font-size: 12px;
+    color: #8A8A90;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .metric-icon {
+    width: 14px;
+    height: 14px;
+    color: #F0522A;
+  }
+  .metric-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #F2F2F2;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+  .metric-delta {
+    font-size: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .delta-up { color: #4EC49A; }
+  .delta-down { color: #E24040; }
+  .delta-period { color: #70707A; margin-left: 4px; }
+
+  /* Chart Panels */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .chart-panel {
+    background: #1F1F24;
+    border: 1px solid #2A2A2E;
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .chart-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #D0D0D0;
+  }
+  .chart-period {
+    font-size: 12px;
+    color: #70707A;
+    background: #1A1A1E;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid #2A2A2E;
+  }
+
+  /* Mock Chart Areas */
+  .chart-area {
+    height: 180px;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+  }
+  .chart-line-area {
+    height: 180px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+  }
+
+  /* SVG Line Chart Mock */
+  .line-chart-svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Bar Chart Mock */
+  .bar-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .bar {
+    width: 70%;
+    border-radius: 4px 4px 0 0;
+    min-height: 8px;
+  }
+  .bar-label {
+    font-size: 10px;
+    color: #8A8A90;
+  }
+  .chart-axis-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+  .axis-label { font-size: 10px; color: #8A8A90; }
+
+  /* Pie Chart */
+  .pie-chart-container {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    height: 180px;
+  }
+  .pie-svg { width: 160px; height: 160px; }
+  .pie-legend { display: flex; flex-direction: column; gap: 10px; }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #A0A0A6;
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+  .legend-value { color: #D0D0D0; font-weight: 600; margin-left: auto; }
+
+  /* Wide chart */
+  .chart-wide {
+    grid-column: 1 / -1;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #70707A;
+    margin-bottom: 12px;
+  }
+
+  h2 { font-size: 20px; margin-bottom: 8px; color: #F2F2F2; }
+  .subtitle { color: #8A8A90; font-size: 14px; margin-bottom: 20px; }
+</style>
+
+<h2>Dashboard Layout — Qime Redesign</h2>
+<p class="subtitle">Full mockup of the main dashboard with your updated color palette and layout structure</p>
+
+<div class="dashboard-mockup" style="border-radius: 12px; overflow: hidden; border: 1px solid #2A2A2E;">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo">Q<span>.</span></div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Overview</div>
+      <div class="nav-item active">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Monitoring</div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Prompts
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Competitors
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Configuration</div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">AK</div>
+        <div>
+          <div class="user-name">Amer K.</div>
+          <div class="user-email">amer@qime.ai</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Top Bar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="page-title">Dashboard</div>
+        <div class="search-bar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          Search prompts, competitors...
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="date-range">📅 Mar 1 – Mar 26, 2026</div>
+        <button class="btn-primary">+ New Prompt</button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- Metric Cards -->
+      <div class="metrics-row">
+        <div class="metric-card">
+          <div class="metric-label">
+            <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="#F0522A" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Visibility Score
+          </div>
+          <div class="metric-value">72.4</div>
+          <div class="metric-delta delta-up">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m18 15-6-6-6 6"/></svg>
+            +5.2 pts <span class="delta-period">vs last month</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-label">
+            <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="#F0522A" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Mention Rate
+          </div>
+          <div class="metric-value">64.8%</div>
+          <div class="metric-delta delta-up">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m18 15-6-6-6 6"/></svg>
+            +3.1% <span class="delta-period">vs last month</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-label">
+            <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="#F0522A" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            Citation Rate
+          </div>
+          <div class="metric-value">41.2%</div>
+          <div class="metric-delta delta-down">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+            -1.8% <span class="delta-period">vs last month</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-label">
+            <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="#F0522A" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+            Share of Voice
+          </div>
+          <div class="metric-value">38.5%</div>
+          <div class="metric-delta delta-up">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m18 15-6-6-6 6"/></svg>
+            +2.4% <span class="delta-period">vs last month</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-label">
+            <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="#F0522A" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+            Total Runs
+          </div>
+          <div class="metric-value">1,247</div>
+          <div class="metric-delta delta-up">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m18 15-6-6-6 6"/></svg>
+            +184 <span class="delta-period">vs last month</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row 1 -->
+      <div class="charts-grid">
+
+        <!-- Visibility Score Trend -->
+        <div class="chart-panel">
+          <div class="chart-header">
+            <div class="chart-title">Visibility Score Trend</div>
+            <div class="chart-period">30 days</div>
+          </div>
+          <div class="chart-line-area">
+            <svg class="line-chart-svg" viewBox="0 0 500 180" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#F0522A" stop-opacity="0.15"/>
+                  <stop offset="100%" stop-color="#F0522A" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <!-- Grid lines -->
+              <line x1="0" y1="45" x2="500" y2="45" stroke="#2A2A2E" stroke-width="1"/>
+              <line x1="0" y1="90" x2="500" y2="90" stroke="#2A2A2E" stroke-width="1"/>
+              <line x1="0" y1="135" x2="500" y2="135" stroke="#2A2A2E" stroke-width="1"/>
+              <!-- Area fill -->
+              <path d="M0,140 C30,135 60,120 100,110 C140,100 170,95 200,80 C230,65 260,75 300,60 C340,45 370,55 400,40 C430,25 460,30 500,20 L500,180 L0,180 Z" fill="url(#areaGrad)"/>
+              <!-- Line -->
+              <path d="M0,140 C30,135 60,120 100,110 C140,100 170,95 200,80 C230,65 260,75 300,60 C340,45 370,55 400,40 C430,25 460,30 500,20" fill="none" stroke="#F0522A" stroke-width="2.5"/>
+              <!-- Dot at end -->
+              <circle cx="500" cy="20" r="4" fill="#F0522A"/>
+            </svg>
+          </div>
+          <div class="chart-axis-labels">
+            <span class="axis-label">Mar 1</span>
+            <span class="axis-label">Mar 7</span>
+            <span class="axis-label">Mar 14</span>
+            <span class="axis-label">Mar 21</span>
+            <span class="axis-label">Mar 26</span>
+          </div>
+        </div>
+
+        <!-- Share of Voice Pie -->
+        <div class="chart-panel">
+          <div class="chart-header">
+            <div class="chart-title">Share of Voice</div>
+            <div class="chart-period">This month</div>
+          </div>
+          <div class="pie-chart-container">
+            <svg class="pie-svg" viewBox="0 0 160 160">
+              <!-- Background circle -->
+              <circle cx="80" cy="80" r="60" fill="none" stroke="#2A2A2E" stroke-width="24"/>
+              <!-- Segments (donut chart) -->
+              <!-- Your Brand: 38.5% = 138.6deg -->
+              <circle cx="80" cy="80" r="60" fill="none" stroke="#F0522A" stroke-width="24"
+                stroke-dasharray="145 377" stroke-dashoffset="0" transform="rotate(-90 80 80)"/>
+              <!-- Competitor A: 24% = 86.4deg -->
+              <circle cx="80" cy="80" r="60" fill="none" stroke="#C43828" stroke-width="24"
+                stroke-dasharray="90 377" stroke-dashoffset="-145" transform="rotate(-90 80 80)"/>
+              <!-- Competitor B: 18.5% -->
+              <circle cx="80" cy="80" r="60" fill="none" stroke="#F07A3A" stroke-width="24"
+                stroke-dasharray="70 377" stroke-dashoffset="-235" transform="rotate(-90 80 80)"/>
+              <!-- Others: 19% -->
+              <circle cx="80" cy="80" r="60" fill="none" stroke="#F09A50" stroke-width="24"
+                stroke-dasharray="72 377" stroke-dashoffset="-305" transform="rotate(-90 80 80)"/>
+              <!-- Center text -->
+              <text x="80" y="76" text-anchor="middle" font-size="20" font-weight="700" fill="#F2F2F2">38.5%</text>
+              <text x="80" y="94" text-anchor="middle" font-size="10" fill="#8A8A90">Your Brand</text>
+            </svg>
+            <div class="pie-legend">
+              <div class="legend-item">
+                <div class="legend-dot" style="background: #F0522A;"></div>
+                Your Brand
+                <span class="legend-value">38.5%</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background: #C43828;"></div>
+                Competitor A
+                <span class="legend-value">24.0%</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background: #F07A3A;"></div>
+                Competitor B
+                <span class="legend-value">18.5%</span>
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background: #F09A50;"></div>
+                Others
+                <span class="legend-value">19.0%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Platform Breakdown -->
+        <div class="chart-panel">
+          <div class="chart-header">
+            <div class="chart-title">Platform Breakdown</div>
+            <div class="chart-period">30 days</div>
+          </div>
+          <div class="chart-area">
+            <div class="bar-group">
+              <div class="bar" style="height: 140px; background: #F0522A;"></div>
+              <div class="bar-label">ChatGPT</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar" style="height: 110px; background: #C43828;"></div>
+              <div class="bar-label">Perplexity</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar" style="height: 85px; background: #F07A3A;"></div>
+              <div class="bar-label">Gemini</div>
+            </div>
+            <div class="bar-group">
+              <div class="bar" style="height: 60px; background: #D44E2E;"></div>
+              <div class="bar-label">AI Overview</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Competitor Comparison -->
+        <div class="chart-panel">
+          <div class="chart-header">
+            <div class="chart-title">Competitor Comparison</div>
+            <div class="chart-period">30 days</div>
+          </div>
+          <div class="chart-line-area">
+            <svg class="line-chart-svg" viewBox="0 0 500 180" preserveAspectRatio="none">
+              <!-- Grid lines -->
+              <line x1="0" y1="45" x2="500" y2="45" stroke="#2A2A2E" stroke-width="1"/>
+              <line x1="0" y1="90" x2="500" y2="90" stroke="#2A2A2E" stroke-width="1"/>
+              <line x1="0" y1="135" x2="500" y2="135" stroke="#2A2A2E" stroke-width="1"/>
+              <!-- Your brand -->
+              <path d="M0,100 C60,90 120,70 180,65 C240,60 300,50 360,40 C420,30 460,25 500,20" fill="none" stroke="#F0522A" stroke-width="2.5"/>
+              <!-- Competitor A -->
+              <path d="M0,110 C60,115 120,105 180,100 C240,95 300,90 360,85 C420,88 460,82 500,78" fill="none" stroke="#C43828" stroke-width="2" stroke-dasharray="6 4"/>
+              <!-- Competitor B -->
+              <path d="M0,130 C60,128 120,132 180,125 C240,120 300,118 360,122 C420,115 460,112 500,110" fill="none" stroke="#F07A3A" stroke-width="2" stroke-dasharray="6 4"/>
+            </svg>
+          </div>
+          <div class="chart-axis-labels" style="display: flex; gap: 16px; margin-top: 8px;">
+            <div class="legend-item" style="display: flex; align-items: center; gap: 6px;">
+              <div style="width: 16px; height: 2px; background: #F0522A;"></div>
+              <span class="axis-label">Your Brand</span>
+            </div>
+            <div class="legend-item" style="display: flex; align-items: center; gap: 6px;">
+              <div style="width: 16px; height: 2px; background: #C43828; border-style: dashed;"></div>
+              <span class="axis-label">Competitor A</span>
+            </div>
+            <div class="legend-item" style="display: flex; align-items: center; gap: 6px;">
+              <div style="width: 16px; height: 2px; background: #F07A3A;"></div>
+              <span class="axis-label">Competitor B</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Wide Chart Row -->
+      <div class="charts-grid">
+        <div class="chart-panel chart-wide">
+          <div class="chart-header">
+            <div class="chart-title">Mention & Citation Trends by Topic</div>
+            <div style="display: flex; gap: 8px;">
+              <div class="chart-period" style="background: rgba(240,82,42,0.14); border-color: rgba(240,82,42,0.3); color: #F0522A;">Mentions</div>
+              <div class="chart-period">Citations</div>
+            </div>
+          </div>
+          <div class="chart-line-area">
+            <svg class="line-chart-svg" viewBox="0 0 1000 180" preserveAspectRatio="none">
+              <!-- Grid -->
+              <line x1="0" y1="45" x2="1000" y2="45" stroke="#2A2A2E" stroke-width="1"/>
+              <line x1="0" y1="90" x2="1000" y2="90" stroke="#2A2A2E" stroke-width="1"/>
+              <line x1="0" y1="135" x2="1000" y2="135" stroke="#2A2A2E" stroke-width="1"/>
+              <!-- Mentions line -->
+              <defs>
+                <linearGradient id="areaGrad2" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#F0522A" stop-opacity="0.1"/>
+                  <stop offset="100%" stop-color="#F0522A" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,120 C80,115 160,100 240,90 C320,80 400,75 480,65 C560,60 640,55 720,50 C800,45 880,40 1000,30" fill="none" stroke="#F0522A" stroke-width="2.5"/>
+              <!-- Citations line -->
+              <path d="M0,145 C80,140 160,135 240,128 C320,120 400,118 480,110 C560,105 640,100 720,95 C800,92 880,88 1000,80" fill="none" stroke="#F07A3A" stroke-width="2"/>
+            </svg>
+          </div>
+          <div class="chart-axis-labels">
+            <span class="axis-label">Feb 26</span>
+            <span class="axis-label">Mar 5</span>
+            <span class="axis-label">Mar 12</span>
+            <span class="axis-label">Mar 19</span>
+            <span class="axis-label">Mar 26</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

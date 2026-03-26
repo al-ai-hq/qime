@@ -94,8 +94,6 @@ export default async function DashboardPage({
           competitors={competitors}
           brandName={brandName}
         />
-      </div>
-      <div className="grid gap-4 lg:grid-cols-2">
         <MentionCitationTrends runs={chartRuns} />
       </div>
       <RecentRuns runs={recentRuns as unknown as { id: string; prompt_id: string; platform_id: string; visibility_score: number; brand_mentioned: boolean; brand_cited: boolean; created_at: string; prompts: { title: string } | null }[]} orgId={orgId} />

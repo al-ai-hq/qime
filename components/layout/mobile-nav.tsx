@@ -2,31 +2,10 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { X, LayoutDashboard, MessageSquare, Users, Settings } from 'lucide-react'
+import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/shared/logo'
-
-const navGroups = (orgId: string) => [
-  {
-    label: 'Overview',
-    items: [
-      { href: `/${orgId}`, label: 'Dashboard', icon: LayoutDashboard, exact: true as const },
-    ],
-  },
-  {
-    label: 'Monitoring',
-    items: [
-      { href: `/${orgId}/prompts`, label: 'Prompts', icon: MessageSquare, exact: false as const },
-      { href: `/${orgId}/competitors`, label: 'Competitors', icon: Users, exact: false as const },
-    ],
-  },
-  {
-    label: 'Configuration',
-    items: [
-      { href: `/${orgId}/settings`, label: 'Settings', icon: Settings, exact: false as const },
-    ],
-  },
-]
+import { navGroups } from '@/components/layout/nav-config'
 
 interface MobileNavProps {
   orgId: string
@@ -40,9 +19,11 @@ export function MobileNav({ orgId, isOpen, onClose }: MobileNavProps) {
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 z-40 bg-black/50 md:hidden" onClick={onClose} />
+        <div className="fixed inset-0 z-40 bg-black/50 md:hidden" aria-hidden="true" onClick={onClose} />
       )}
       <aside
+        role="dialog"
+        aria-label="Navigation menu"
         className={cn(
           'fixed inset-y-0 left-0 z-50 w-[280px] transform bg-[var(--surface-chrome)] transition-transform duration-200 ease-in-out md:hidden',
           isOpen ? 'translate-x-0' : '-translate-x-full'
@@ -50,7 +31,7 @@ export function MobileNav({ orgId, isOpen, onClose }: MobileNavProps) {
       >
         <div className="flex items-center justify-between px-5 py-5">
           <Logo linkTo={`/${orgId}`} />
-          <button onClick={onClose} className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
+          <button onClick={onClose} aria-label="Close navigation" className="text-[var(--text-muted)] hover:text-[var(--text-primary)]">
             <X className="h-5 w-5" />
           </button>
         </div>

@@ -38,7 +38,7 @@ export function TopBar({ pageTitle, userEmail, action, onMenuToggle }: TopBarPro
     <header className="flex h-14 items-center justify-between border-b border-[var(--border-chrome)] bg-[var(--surface-chrome)] px-4 md:px-7">
       <div className="flex items-center gap-4">
         {onMenuToggle && (
-          <button onClick={onMenuToggle} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] md:hidden">
+          <button onClick={onMenuToggle} aria-label="Open navigation" className="text-[var(--text-muted)] hover:text-[var(--text-primary)] md:hidden">
             <Menu className="h-5 w-5" />
           </button>
         )}

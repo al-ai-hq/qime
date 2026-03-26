@@ -68,7 +68,7 @@ export default function SetupPlatformSelectPage() {
                 'w-full rounded-xl border p-4 text-left transition-colors',
                 selected.has(p.id)
                   ? 'border-l-2 border-l-[var(--accent-primary)] bg-[var(--accent-subtle)] border-[var(--border-primary)]'
-                  : 'border-[var(--border-primary)] bg-[var(--surface-card)] text-[var(--text-muted)] hover:bg-[var(--surface-overlay)]'
+                  : 'border-[var(--border-primary)] bg-[var(--surface-card)] text-[var(--text-muted)] hover:bg-[var(--surface-active)]'
               )}
             >
               <p className={cn(

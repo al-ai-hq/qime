@@ -38,6 +38,7 @@
     /* Semantic */
     --semantic-positive: #4EC49A;
     --semantic-negative: #E24040;
+    --semantic-warning: #E8A83E;
 
     /* Interactive */
     --hover-surface: rgba(255,255,255, 0.04);

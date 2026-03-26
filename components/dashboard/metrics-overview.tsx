@@ -19,19 +19,16 @@ export function MetricsOverview({ metrics }: MetricsOverviewProps) {
         icon={Eye}
         label="Visibility Score"
         value={metrics.visibility_score > 0 ? metrics.visibility_score.toFixed(1) : '--'}
-        delta={metrics.visibility_score > 0 ? { value: 2.1, suffix: 'pts', period: 'vs last month' } : undefined}
       />
       <MetricCard
         icon={MessageSquare}
         label="Mention Rate"
         value={metrics.total_runs > 0 ? `${(metrics.mention_frequency * 100).toFixed(1)}%` : '--'}
-        delta={metrics.total_runs > 0 ? { value: 3.4, suffix: '%', period: 'vs last month' } : undefined}
       />
       <MetricCard
         icon={Link}
         label="Citation Rate"
         value={metrics.total_runs > 0 ? `${(metrics.citation_frequency * 100).toFixed(1)}%` : '--'}
-        delta={metrics.total_runs > 0 ? { value: 1.2, suffix: '%', period: 'vs last month' } : undefined}
       />
       <MetricCard
         icon={Globe}
@@ -39,9 +36,6 @@ export function MetricsOverview({ metrics }: MetricsOverviewProps) {
         value={metrics.share_of_voice && metrics.share_of_voice.total_mentions > 0
           ? `${(metrics.share_of_voice.brand_share * 100).toFixed(1)}%`
           : '--'}
-        delta={metrics.share_of_voice && metrics.share_of_voice.total_mentions > 0
-          ? { value: 0.8, suffix: '%', period: 'vs last month' }
-          : undefined}
       />
       <MetricCard
         icon={BarChart3}
