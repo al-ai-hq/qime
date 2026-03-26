@@ -3,19 +3,29 @@
 import { useMemo } from 'react'
 import { format } from 'date-fns'
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ChartPanel } from '@/components/shared/chart-panel'
 
 interface Run {
   visibility_score: number
   created_at: string
+}
+
+function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) {
+  if (!active || !payload?.length) return null
+  return (
+    <div className="rounded-lg border border-[var(--border-primary)] bg-[var(--surface-card)] px-3 py-2 text-xs shadow-lg">
+      <p className="mb-1 text-[var(--text-muted)]">{label}</p>
+      <p className="font-medium text-[var(--text-primary)]">{payload[0].value}</p>
+    </div>
+  )
 }
 
 export function MetricsChart({ runs }: { runs: Run[] }) {
@@ -34,34 +44,39 @@ export function MetricsChart({ runs }: { runs: Run[] }) {
     }))
   }, [runs])
 
+  if (data.length === 0) {
+    return (
+      <ChartPanel title="Visibility Score Trend" period="30 days">
+        <div className="flex h-[200px] items-center justify-center text-sm text-[var(--text-muted)]">
+          No data yet. Run some prompts to see trends.
+        </div>
+      </ChartPanel>
+    )
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Visibility Score Trend</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {data.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">
-            No data yet. Run some prompts to see trends.
-          </p>
-        ) : (
-          <ResponsiveContainer width="100%" height={240}>
-            <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis domain={[0, 100]} fontSize={12} tickLine={false} axisLine={false} />
-              <Tooltip />
-              <Line
-                type="monotone"
-                dataKey="score"
-                stroke="hsl(var(--primary))"
-                strokeWidth={2}
-                dot={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        )}
-      </CardContent>
-    </Card>
+    <ChartPanel title="Visibility Score Trend" period="30 days">
+      <ResponsiveContainer width="100%" height={200}>
+        <AreaChart data={data}>
+          <defs>
+            <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#F0522A" stopOpacity={0.15} />
+              <stop offset="100%" stopColor="#F0522A" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border-primary)" />
+          <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} tick={{ fill: 'var(--text-muted)' }} />
+          <YAxis domain={[0, 100]} fontSize={12} tickLine={false} axisLine={false} tick={{ fill: 'var(--text-muted)' }} />
+          <Tooltip content={<CustomTooltip />} />
+          <Area
+            type="monotone"
+            dataKey="score"
+            stroke="#F0522A"
+            strokeWidth={2}
+            fill="url(#scoreGradient)"
+          />
+        </AreaChart>
+      </ResponsiveContainer>
+    </ChartPanel>
   )
 }

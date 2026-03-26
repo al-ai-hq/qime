@@ -6,14 +6,7 @@ import { Plus, Pencil, Trash2, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { api } from '@/lib/api/client'
 import { Button } from '@/components/ui/button'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { PageHeader } from '@/components/layout/page-header'
 import { EmptyState } from '@/components/shared/empty-state'
 import { ConfirmDialog } from '@/components/shared/confirm-dialog'
 import { CompetitorForm } from '@/components/competitors/competitor-form'
@@ -54,6 +47,7 @@ export function CompetitorList({ competitors, orgId }: { competitors: Competitor
   if (competitors.length === 0 && !formOpen) {
     return (
       <>
+        <PageHeader title="Competitors" />
         <EmptyState
           icon={<Users className="h-12 w-12" />}
           title="No competitors yet"
@@ -61,7 +55,7 @@ export function CompetitorList({ competitors, orgId }: { competitors: Competitor
           action={
             <Button onClick={openCreate} className="gap-2">
               <Plus className="h-4 w-4" />
-              Add competitor
+              Add Competitor
             </Button>
           }
         />
@@ -77,45 +71,45 @@ export function CompetitorList({ competitors, orgId }: { competitors: Competitor
 
   return (
     <>
-      <div className="flex justify-end">
-        <Button onClick={openCreate} size="sm" className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add competitor
-        </Button>
+      <PageHeader
+        title="Competitors"
+        action={
+          <Button onClick={openCreate} size="sm" className="gap-2">
+            <Plus className="h-4 w-4" />
+            Add Competitor
+          </Button>
+        }
+      />
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {competitors.map((c) => (
+          <div
+            key={c.id}
+            className="group relative rounded-xl border border-[var(--border-primary)] bg-[var(--surface-card)] p-5 transition-all duration-150 hover:bg-[var(--hover-surface)]"
+          >
+            {/* Hover action buttons */}
+            <div className="absolute right-3 top-3 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+              <Button variant="ghost" size="icon" onClick={() => openEdit(c)}>
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(c)}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Card content */}
+            <h3 className="text-base font-semibold text-[var(--text-secondary)]">{c.name}</h3>
+            <p className="mt-1 text-sm text-[var(--text-muted)]">
+              {c.website || <span className="text-[var(--text-hint)]">No website</span>}
+            </p>
+            {c.alternate_names && c.alternate_names.length > 0 && (
+              <p className="mt-2 text-xs text-[var(--text-muted)]">
+                {c.alternate_names.join(', ')}
+              </p>
+            )}
+          </div>
+        ))}
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Alternate names</TableHead>
-            <TableHead>Website</TableHead>
-            <TableHead className="w-24" />
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {competitors.map((c) => (
-            <TableRow key={c.id}>
-              <TableCell className="font-medium">{c.name}</TableCell>
-              <TableCell className="text-muted-foreground">
-                {c.alternate_names && c.alternate_names.length > 0
-                  ? c.alternate_names.join(', ')
-                  : '--'}
-              </TableCell>
-              <TableCell className="text-muted-foreground">{c.website || '--'}</TableCell>
-              <TableCell>
-                <div className="flex gap-1">
-                  <Button variant="ghost" size="icon" onClick={() => openEdit(c)}>
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(c)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
 
       <CompetitorForm
         open={formOpen}

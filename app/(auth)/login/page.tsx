@@ -19,7 +19,8 @@ export default async function LoginPage() {
 
   return (
     <>
-      <h1 className="mb-6 text-center text-2xl font-semibold">Log in to Qime</h1>
+      <h1 className="text-xl font-semibold text-[var(--text-primary)]">Welcome back</h1>
+      <p className="text-sm text-[var(--text-muted)] mb-6">Sign in to your account</p>
       <LoginForm />
     </>
   )

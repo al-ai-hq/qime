@@ -19,9 +19,9 @@ export default async function SignupPage() {
 
   return (
     <>
-      <h1 className="mb-2 text-center text-2xl font-semibold">Admin Setup</h1>
-      <p className="mb-6 text-center text-sm text-muted-foreground">
-        Create the initial admin account for this Qime instance.
+      <h1 className="text-xl font-semibold text-[var(--text-primary)]">Create admin account</h1>
+      <p className="text-sm text-[var(--text-muted)] mb-6">
+        Set up the first account for your organization
       </p>
       <SignupForm adminEmail={adminEmail} />
     </>

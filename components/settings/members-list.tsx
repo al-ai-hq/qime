@@ -7,16 +7,6 @@ import { toast } from 'sonner'
 import { api } from '@/lib/api/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,6 +27,7 @@ export function MembersList({ orgId, members }: { orgId: string; members: Organi
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [inviting, setInviting] = useState(false)
+  const [showInvite, setShowInvite] = useState(false)
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean
     title: string
@@ -57,6 +48,7 @@ export function MembersList({ orgId, members }: { orgId: string; members: Organi
         toast.success('Invitation email sent')
       }
       setEmail('')
+      setShowInvite(false)
       router.refresh()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to invite')
@@ -107,30 +99,48 @@ export function MembersList({ orgId, members }: { orgId: string; members: Organi
     }
   }
 
+  function getInitials(member: OrganizationMember) {
+    if (member.full_name) {
+      return member.full_name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
+    }
+    if (member.user_email) {
+      return member.user_email.slice(0, 2).toUpperCase()
+    }
+    return '??'
+  }
+
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Members</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <section>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-base font-semibold text-[var(--text-secondary)]">Members</h2>
+            <p className="mt-1 text-sm text-[var(--text-muted)]">Manage who has access to this organization</p>
+          </div>
+          <Button size="sm" onClick={() => setShowInvite(!showInvite)}>
+            <Send className="mr-1.5 h-4 w-4" />
+            Invite Member
+          </Button>
+        </div>
+
+        {showInvite && (
           <form
             onSubmit={(e) => { e.preventDefault(); handleInvite('send_email') }}
-            className="flex max-w-lg gap-2"
+            className="mt-4 flex max-w-[640px] gap-2"
           >
             <Input
               type="email"
-              placeholder="Invite by email"
+              placeholder="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoFocus
             />
             <Button
               type="submit"
               size="sm"
               disabled={inviting || !email.trim()}
-              className="gap-1"
             >
-              <Send className="h-4 w-4" />
+              <Mail className="mr-1.5 h-4 w-4" />
               Send Email
             </Button>
             <Button
@@ -138,80 +148,91 @@ export function MembersList({ orgId, members }: { orgId: string; members: Organi
               size="sm"
               variant="outline"
               disabled={inviting || !email.trim()}
-              className="gap-1"
               onClick={() => handleInvite('copy_link')}
             >
-              <Link2 className="h-4 w-4" />
+              <Link2 className="mr-1.5 h-4 w-4" />
               Copy Link
             </Button>
           </form>
-          <p className="text-xs text-muted-foreground">
-            Send an invite email or copy an invite link for the user to set up their account.
-          </p>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>User</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-[50px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {members.map((m) => (
-                <TableRow key={m.id}>
-                  <TableCell>{m.user_email ?? m.user_id}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="capitalize">
-                      {m.role}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={m.status === 'active' ? 'default' : 'secondary'}
-                      className={m.status === 'pending' ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100' : ''}
-                    >
-                      {m.status === 'pending' ? 'Pending' : 'Active'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {m.role !== 'owner' && (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {m.status === 'pending' && (
-                            <>
-                              <DropdownMenuItem onClick={() => handleResend(m.id, 'send_email')}>
-                                <Mail className="mr-2 h-4 w-4" />
-                                Resend email
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleResend(m.id, 'copy_link')}>
-                                <Link2 className="mr-2 h-4 w-4" />
-                                Copy invite link
-                              </DropdownMenuItem>
-                            </>
-                          )}
-                          <DropdownMenuItem
-                            onClick={() => handleRemove(m)}
-                            className="text-destructive focus:text-destructive"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            {m.status === 'pending' ? 'Cancel invite' : 'Remove member'}
+        )}
+
+        <div className="mt-4 space-y-2">
+          {members.map((m) => (
+            <div
+              key={m.id}
+              className="group flex items-center gap-3 rounded-lg border border-[var(--border-primary)] bg-[var(--surface-card)] px-4 py-3"
+            >
+              {/* Avatar */}
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--surface-active)] text-xs font-medium text-[var(--text-body)]">
+                {getInitials(m)}
+              </div>
+
+              {/* Name + email */}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-[var(--text-secondary)]">
+                  {m.full_name ?? m.user_email ?? m.user_id}
+                </p>
+                {m.full_name && m.user_email && (
+                  <p className="truncate text-xs text-[var(--text-muted)]">{m.user_email}</p>
+                )}
+              </div>
+
+              {/* Role badge */}
+              <span className={
+                m.role === 'owner' || m.role === 'admin'
+                  ? 'rounded-md bg-[var(--accent-muted)] px-2 py-0.5 text-xs font-medium capitalize text-[var(--accent-primary)]'
+                  : 'rounded-md bg-[var(--surface-active)] px-2 py-0.5 text-xs font-medium capitalize text-[var(--text-body)]'
+              }>
+                {m.role}
+              </span>
+
+              {/* Status for pending */}
+              {m.status === 'pending' && (
+                <span className="rounded-md bg-yellow-500/10 px-2 py-0.5 text-xs text-yellow-500">
+                  Pending
+                </span>
+              )}
+
+              {/* Actions */}
+              {m.role !== 'owner' && (
+                <div className="opacity-0 transition-opacity group-hover:opacity-100">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {m.status === 'pending' && (
+                        <>
+                          <DropdownMenuItem onClick={() => handleResend(m.id, 'send_email')}>
+                            <Mail className="mr-2 h-4 w-4" />
+                            Resend email
                           </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                          <DropdownMenuItem onClick={() => handleResend(m.id, 'copy_link')}>
+                            <Link2 className="mr-2 h-4 w-4" />
+                            Copy invite link
+                          </DropdownMenuItem>
+                        </>
+                      )}
+                      <DropdownMenuItem
+                        onClick={() => handleRemove(m)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        {m.status === 'pending' ? 'Cancel invite' : 'Remove member'}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
+            </div>
+          ))}
+          {members.length === 0 && (
+            <p className="text-sm text-[var(--text-muted)]">No members yet.</p>
+          )}
+        </div>
+      </section>
 
       <Dialog open={confirmDialog.open} onOpenChange={(open) => setConfirmDialog((prev) => ({ ...prev, open }))}>
         <DialogContent>

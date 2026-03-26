@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { api } from '@/lib/api/client'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
 const PLATFORMS = [
@@ -39,31 +38,33 @@ export function PlatformSelector({ orgId, activePlatforms }: { orgId: string; ac
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">AI Platforms</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          {PLATFORMS.map((p) => (
+    <section>
+      <h2 className="text-base font-semibold text-[var(--text-secondary)]">AI Platforms</h2>
+      <p className="mt-1 text-sm text-[var(--text-muted)]">Select which AI platforms to monitor</p>
+      <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3">
+        {PLATFORMS.map((p) => {
+          const isActive = active.has(p.id)
+          return (
             <button
               key={p.id}
               type="button"
               disabled={loading === p.id}
               onClick={() => toggle(p.id)}
               className={cn(
-                'w-full max-w-md rounded-lg border p-4 text-left transition-colors',
-                active.has(p.id)
-                  ? 'border-primary bg-primary/5'
-                  : 'hover:bg-accent'
+                'rounded-xl border p-4 text-left transition-colors',
+                isActive
+                  ? 'border-l-2 border-l-[var(--accent-primary)] border-[var(--border-primary)] bg-[var(--accent-subtle)]'
+                  : 'border-[var(--border-primary)] bg-[var(--surface-card)] text-[var(--text-muted)] hover:bg-[var(--hover-surface)]'
               )}
             >
-              <p className="font-medium">{p.name}</p>
-              <p className="text-sm text-muted-foreground">{p.description}</p>
+              <p className={cn('font-medium', isActive ? 'text-[var(--text-secondary)]' : 'text-[var(--text-muted)]')}>
+                {p.name}
+              </p>
+              <p className="mt-1 text-sm text-[var(--text-muted)]">{p.description}</p>
             </button>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+          )
+        })}
+      </div>
+    </section>
   )
 }

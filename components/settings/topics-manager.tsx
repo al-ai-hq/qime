@@ -2,18 +2,18 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Trash2 } from 'lucide-react'
+import { X } from 'lucide-react'
 import { toast } from 'sonner'
 import { api } from '@/lib/api/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { Topic } from '@/lib/types'
 
 export function TopicsManager({ orgId, topics }: { orgId: string; topics: Topic[] }) {
   const router = useRouter()
   const [newName, setNewName] = useState('')
   const [adding, setAdding] = useState(false)
+  const [showInput, setShowInput] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
 
   async function addTopic(e: React.FormEvent) {
@@ -23,6 +23,7 @@ export function TopicsManager({ orgId, topics }: { orgId: string; topics: Topic[
     try {
       await api.topics.create(orgId, { name: newName.trim() })
       setNewName('')
+      setShowInput(false)
       toast.success('Topic added')
       router.refresh()
     } catch (err) {
@@ -46,42 +47,60 @@ export function TopicsManager({ orgId, topics }: { orgId: string; topics: Topic[
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Topics</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <form onSubmit={addTopic} className="flex max-w-md gap-2">
+    <section>
+      <div className="flex items-center gap-3">
+        <h2 className="text-base font-semibold text-[var(--text-secondary)]">Topics</h2>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="text-[var(--accent-primary)] hover:text-[var(--accent-primary)]"
+          onClick={() => setShowInput(true)}
+        >
+          + Add Topic
+        </Button>
+      </div>
+      <p className="mt-1 text-sm text-[var(--text-muted)]">Categorize prompts by topic</p>
+
+      {showInput && (
+        <form onSubmit={addTopic} className="mt-4 flex max-w-[640px] gap-2">
           <Input
             placeholder="New topic name"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             dir="auto"
+            autoFocus
           />
-          <Button type="submit" size="sm" disabled={adding} className="gap-1">
-            <Plus className="h-4 w-4" />
+          <Button type="submit" size="sm" disabled={adding}>
             Add
           </Button>
+          <Button type="button" variant="ghost" size="sm" onClick={() => { setShowInput(false); setNewName('') }}>
+            Cancel
+          </Button>
         </form>
-        <div className="space-y-2">
-          {topics.map((topic) => (
-            <div key={topic.id} className="flex max-w-md items-center justify-between rounded-md border px-3 py-2">
-              <span className="text-sm" dir="auto">{topic.name}</span>
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled={deleting === topic.id}
-                onClick={() => deleteTopic(topic.id)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
-          {topics.length === 0 && (
-            <p className="text-sm text-muted-foreground">No topics yet.</p>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+      )}
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {topics.map((topic) => (
+          <span
+            key={topic.id}
+            className="flex items-center gap-1 rounded-md bg-[var(--accent-muted)] px-2.5 py-1 text-xs text-[var(--text-body)]"
+          >
+            <span dir="auto">{topic.name}</span>
+            <button
+              type="button"
+              disabled={deleting === topic.id}
+              onClick={() => deleteTopic(topic.id)}
+              className="ml-0.5 text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </span>
+        ))}
+        {topics.length === 0 && (
+          <p className="text-sm text-[var(--text-muted)]">No topics yet.</p>
+        )}
+      </div>
+    </section>
   )
 }

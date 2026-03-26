@@ -4,26 +4,61 @@ import remarkGfm from 'remark-gfm'
 
 export function PromptRunDetail({ run, competitorMap }: { run: PromptRun; competitorMap: Record<string, string> }) {
   return (
-    <div className="space-y-3 bg-muted/50 p-4 text-sm">
+    <div className="space-y-5">
+      {/* Response */}
       <div>
-        <span className="font-medium">Response:</span>
-        <div className="mt-1 max-h-48 overflow-y-auto rounded border border-gray-300 bg-gray-50 p-3 text-black prose prose-sm max-w-none" dir="auto">
+        <h4 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)] mb-2">
+          Response
+        </h4>
+        <div
+          className="max-h-[400px] overflow-y-auto rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-active)] p-4 prose prose-sm prose-invert max-w-none text-[var(--text-body)]"
+          dir="auto"
+        >
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
             {run.response_text}
           </ReactMarkdown>
         </div>
       </div>
+
+      {/* Score & Metrics */}
+      <div>
+        <h4 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)] mb-2">
+          Scoring
+        </h4>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-active)] p-3 text-center">
+            <div className="text-lg font-semibold text-[var(--text-primary)]">{Math.round(run.visibility_score)}</div>
+            <div className="text-xs text-[var(--text-muted)]">Score</div>
+          </div>
+          <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-active)] p-3 text-center">
+            <div className="text-lg font-semibold text-[var(--text-primary)]">{run.brand_mentioned ? 'Yes' : 'No'}</div>
+            <div className="text-xs text-[var(--text-muted)]">Mentioned</div>
+          </div>
+          <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-active)] p-3 text-center">
+            <div className="text-lg font-semibold text-[var(--text-primary)]">{run.brand_cited ? 'Yes' : 'No'}</div>
+            <div className="text-xs text-[var(--text-muted)]">Cited</div>
+          </div>
+          <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--surface-active)] p-3 text-center">
+            <div className="text-lg font-semibold text-[var(--text-primary)]">{(run.duration_ms / 1000).toFixed(1)}s</div>
+            <div className="text-xs text-[var(--text-muted)]">Duration</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Cited URLs */}
       {run.cited_urls && run.cited_urls.length > 0 && (
         <div>
-          <span className="font-medium">Cited URLs:</span>
-          <ul className="mt-1 list-inside list-disc text-muted-foreground">
+          <h4 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)] mb-2">
+            Cited URLs
+          </h4>
+          <ul className="space-y-1">
             {run.cited_urls.map((cite, i) => (
               <li key={i}>
                 <a
                   href={cite.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:underline"
+                  className="text-sm text-[var(--accent-primary)] hover:underline"
                 >
                   {cite.title || cite.url}
                 </a>
@@ -32,19 +67,28 @@ export function PromptRunDetail({ run, competitorMap }: { run: PromptRun; compet
           </ul>
         </div>
       )}
+
+      {/* Competitor mentions */}
       {run.competitor_mentions && Object.keys(run.competitor_mentions).length > 0 && (
         <div>
-          <span className="font-medium">Competitor mentions:</span>
-          <div className="mt-1 flex flex-wrap gap-2">
+          <h4 className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)] mb-2">
+            Competitor Mentions
+          </h4>
+          <div className="flex flex-wrap gap-2">
             {Object.entries(run.competitor_mentions).map(([id, count]) => (
-              <span key={id} className="rounded bg-muted px-2 py-0.5 text-xs">
+              <span
+                key={id}
+                className="rounded-md bg-[var(--surface-active)] border border-[var(--border-subtle)] px-2.5 py-1 text-xs text-[var(--text-body)]"
+              >
                 {competitorMap[id] ?? id}: {count}
               </span>
             ))}
           </div>
         </div>
       )}
-      <div className="flex gap-4 text-xs text-muted-foreground">
+
+      {/* Metadata */}
+      <div className="flex flex-wrap gap-4 text-xs text-[var(--text-muted)] pt-2 border-t border-[var(--border-subtle)]">
         <span>Sentiment: {run.brand_sentiment ?? 'N/A'}</span>
         <span>Position: {run.organization_position ?? 'N/A'}</span>
         <span>Response length: {run.response_length} chars</span>

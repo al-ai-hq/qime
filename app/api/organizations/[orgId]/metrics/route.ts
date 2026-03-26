@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedUser, checkOrgMembership, jsonError } from '@/lib/api/helpers'
 import { computeAggregateMetrics } from '@/lib/metrics/aggregate'
+import { computeShareOfVoice } from '@/lib/metrics/share-of-voice'
 
 type Params = { params: Promise<{ orgId: string }> }
 
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest, { params }: Params) {
   // Query prompt_runs
   let runsQuery = supabase
     .from('prompt_runs')
-    .select('brand_mentioned, brand_cited, brand_sentiment')
+    .select('brand_mentioned, brand_cited, brand_sentiment, brand_mention_count, competitor_mentions')
     .eq('organization_id', orgId)
 
   if (startDate) {
@@ -83,7 +84,13 @@ export async function GET(request: NextRequest, { params }: Params) {
     return jsonError('Failed to fetch runs', 500)
   }
 
-  const metrics = computeAggregateMetrics(runs ?? [])
+  const { data: competitors } = await supabase
+    .from('competitors')
+    .select('id, name')
+    .eq('organization_id', orgId)
 
-  return NextResponse.json({ metrics })
+  const metrics = computeAggregateMetrics(runs ?? [])
+  const shareOfVoice = computeShareOfVoice(runs ?? [], competitors ?? [])
+
+  return NextResponse.json({ metrics: { ...metrics, share_of_voice: shareOfVoice } })
 }

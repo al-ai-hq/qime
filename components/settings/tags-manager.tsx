@@ -2,18 +2,18 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Trash2 } from 'lucide-react'
+import { X } from 'lucide-react'
 import { toast } from 'sonner'
 import { api } from '@/lib/api/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { Tag } from '@/lib/types'
 
 export function TagsManager({ orgId, tags }: { orgId: string; tags: Tag[] }) {
   const router = useRouter()
   const [newName, setNewName] = useState('')
   const [adding, setAdding] = useState(false)
+  const [showInput, setShowInput] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
 
   async function addTag(e: React.FormEvent) {
@@ -23,6 +23,7 @@ export function TagsManager({ orgId, tags }: { orgId: string; tags: Tag[] }) {
     try {
       await api.tags.create(orgId, { name: newName.trim() })
       setNewName('')
+      setShowInput(false)
       toast.success('Tag added')
       router.refresh()
     } catch (err) {
@@ -46,42 +47,60 @@ export function TagsManager({ orgId, tags }: { orgId: string; tags: Tag[] }) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Tags</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <form onSubmit={addTag} className="flex max-w-md gap-2">
+    <section>
+      <div className="flex items-center gap-3">
+        <h2 className="text-base font-semibold text-[var(--text-secondary)]">Tags</h2>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="text-[var(--accent-primary)] hover:text-[var(--accent-primary)]"
+          onClick={() => setShowInput(true)}
+        >
+          + Add Tag
+        </Button>
+      </div>
+      <p className="mt-1 text-sm text-[var(--text-muted)]">Organize prompts with tags</p>
+
+      {showInput && (
+        <form onSubmit={addTag} className="mt-4 flex max-w-[640px] gap-2">
           <Input
             placeholder="New tag name"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             dir="auto"
+            autoFocus
           />
-          <Button type="submit" size="sm" disabled={adding} className="gap-1">
-            <Plus className="h-4 w-4" />
+          <Button type="submit" size="sm" disabled={adding}>
             Add
           </Button>
+          <Button type="button" variant="ghost" size="sm" onClick={() => { setShowInput(false); setNewName('') }}>
+            Cancel
+          </Button>
         </form>
-        <div className="flex flex-wrap gap-2">
-          {tags.map((tag) => (
-            <div key={tag.id} className="flex items-center gap-1 rounded-full border px-3 py-1">
-              <span className="text-sm" dir="auto">{tag.name}</span>
-              <button
-                type="button"
-                disabled={deleting === tag.id}
-                onClick={() => deleteTag(tag.id)}
-                className="ml-1 text-muted-foreground hover:text-foreground"
-              >
-                <Trash2 className="h-3 w-3" />
-              </button>
-            </div>
-          ))}
-          {tags.length === 0 && (
-            <p className="text-sm text-muted-foreground">No tags yet.</p>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+      )}
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {tags.map((tag) => (
+          <span
+            key={tag.id}
+            className="flex items-center gap-1 rounded-md bg-[var(--accent-muted)] px-2.5 py-1 text-xs text-[var(--text-body)]"
+          >
+            <span dir="auto">{tag.name}</span>
+            <button
+              type="button"
+              disabled={deleting === tag.id}
+              onClick={() => deleteTag(tag.id)}
+              className="ml-0.5 text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </span>
+        ))}
+        {tags.length === 0 && (
+          <p className="text-sm text-[var(--text-muted)]">No tags yet.</p>
+        )}
+      </div>
+    </section>
   )
 }

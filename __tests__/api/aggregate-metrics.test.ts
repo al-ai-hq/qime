@@ -50,6 +50,12 @@ function mockUnauthenticated() {
   })
 }
 
+function mockCompetitors(competitors: { id: string; name: string }[] = []) {
+  const eqMock = vi.fn().mockResolvedValue({ data: competitors, error: null })
+  const selectMock = vi.fn().mockReturnValue({ eq: eqMock })
+  return { select: selectMock }
+}
+
 function mockMembership(hasMembership: boolean) {
   const singleMock = vi.fn().mockResolvedValue({
     data: hasMembership ? { role: 'owner' } : null,
@@ -112,6 +118,7 @@ describe('Aggregate Metrics API', () => {
       mockSupabase.from.mockImplementation((table: string) => {
         if (table === 'organization_members') return membershipMock
         if (table === 'prompt_runs') return { select: selectMock }
+        if (table === 'competitors') return mockCompetitors()
         return {}
       })
 
@@ -151,6 +158,7 @@ describe('Aggregate Metrics API', () => {
       mockSupabase.from.mockImplementation((table: string) => {
         if (table === 'organization_members') return membershipMock
         if (table === 'prompt_runs') return { select: selectMock }
+        if (table === 'competitors') return mockCompetitors()
         return {}
       })
 
@@ -189,6 +197,7 @@ describe('Aggregate Metrics API', () => {
       mockSupabase.from.mockImplementation((table: string) => {
         if (table === 'organization_members') return membershipMock
         if (table === 'prompt_runs') return { select: selectMock }
+        if (table === 'competitors') return mockCompetitors()
         return {}
       })
 
@@ -221,6 +230,7 @@ describe('Aggregate Metrics API', () => {
       mockSupabase.from.mockImplementation((table: string) => {
         if (table === 'organization_members') return membershipMock
         if (table === 'prompt_runs') return { select: selectMock }
+        if (table === 'competitors') return mockCompetitors()
         return {}
       })
 
@@ -274,6 +284,7 @@ describe('Aggregate Metrics API', () => {
         if (table === 'prompt_tags') return { select: tagSelectMock }
         if (table === 'prompts') return { select: promptSelectMock }
         if (table === 'prompt_runs') return { select: runSelectMock }
+        if (table === 'competitors') return mockCompetitors()
         return {}
       })
 
@@ -319,6 +330,7 @@ describe('Aggregate Metrics API', () => {
         if (table === 'organization_members') return membershipMock
         if (table === 'prompts') return { select: promptSelectMock }
         if (table === 'prompt_runs') return { select: runSelectMock }
+        if (table === 'competitors') return mockCompetitors()
         return {}
       })
 

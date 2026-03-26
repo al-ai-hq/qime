@@ -42,12 +42,20 @@ export default async function SetupPage() {
   }
 
   return (
-    <div className="mx-auto max-w-md px-4 py-16">
-      <h1 className="text-2xl font-semibold">Set up your organization</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Configure your brand to start monitoring AI visibility.
-      </p>
-      <OrgSetupForm />
+    <div
+      className="flex min-h-screen flex-col items-center justify-center px-4"
+      style={{
+        background: 'var(--surface-page)',
+        backgroundImage: 'radial-gradient(circle at 50% 40%, rgba(240,82,42,0.04), transparent 60%)',
+      }}
+    >
+      <div className="w-full max-w-[560px] rounded-2xl border border-[var(--border-primary)] bg-[var(--surface-card)] p-8">
+        <h1 className="text-xl font-semibold text-[var(--text-primary)]">Set up your organization</h1>
+        <p className="mt-1 text-sm text-[var(--text-muted)]">
+          Configure your brand to start monitoring AI visibility.
+        </p>
+        <OrgSetupForm />
+      </div>
     </div>
   )
 }
