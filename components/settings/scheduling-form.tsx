@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { OrgSettings } from '@/lib/types'
 
 const FREQUENCIES = [
@@ -42,43 +41,40 @@ export function SchedulingForm({ orgId, settings }: { orgId: string; settings: O
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Scheduling defaults</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={onSubmit} className="max-w-md space-y-4">
-          <div className="space-y-2">
-            <Label>Run frequency</Label>
-            <Select value={frequency} onValueChange={setFrequency}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {FREQUENCIES.map((f) => (
-                  <SelectItem key={f.value} value={f.value}>
-                    {f.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="min-hours">Minimum hours between runs</Label>
-            <Input
-              id="min-hours"
-              type="number"
-              min={1}
-              max={168}
-              value={minHours}
-              onChange={(e) => setMinHours(e.target.value)}
-            />
-          </div>
-          <Button type="submit" disabled={loading}>
-            {loading ? 'Saving...' : 'Save changes'}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+    <section>
+      <h2 className="text-base font-semibold text-[var(--text-secondary)]">Scheduling</h2>
+      <p className="mt-1 text-sm text-[var(--text-muted)]">Configure how often prompts are automatically run against AI platforms</p>
+      <form onSubmit={onSubmit} className="mt-4 max-w-[640px] space-y-4">
+        <div className="space-y-2">
+          <Label className="text-[var(--text-body)]">Run frequency</Label>
+          <Select value={frequency} onValueChange={setFrequency}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {FREQUENCIES.map((f) => (
+                <SelectItem key={f.value} value={f.value}>
+                  {f.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="min-hours" className="text-[var(--text-body)]">Minimum hours between runs</Label>
+          <Input
+            id="min-hours"
+            type="number"
+            min={1}
+            max={168}
+            value={minHours}
+            onChange={(e) => setMinHours(e.target.value)}
+          />
+        </div>
+        <Button type="submit" disabled={loading}>
+          {loading ? 'Saving...' : 'Save Changes'}
+        </Button>
+      </form>
+    </section>
   )
 }

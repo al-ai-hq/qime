@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { PageHeader } from '@/components/layout/page-header'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Separator } from '@/components/ui/separator'
 import { OrgDetailsForm } from '@/components/settings/org-details-form'
 import { SchedulingForm } from '@/components/settings/scheduling-form'
 import { PlatformSelector } from '@/components/settings/platform-selector'
@@ -50,39 +50,33 @@ export default async function SettingsPage({
   )
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader title="Settings" />
-      <Tabs defaultValue="general">
-        <TabsList>
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="scheduling">Scheduling</TabsTrigger>
-          <TabsTrigger value="platforms">Platforms</TabsTrigger>
-          <TabsTrigger value="topics">Topics</TabsTrigger>
-          <TabsTrigger value="tags">Tags</TabsTrigger>
-          <TabsTrigger value="members">Members</TabsTrigger>
-        </TabsList>
-        <TabsContent value="general" className="mt-6">
-          <OrgDetailsForm orgId={orgId} org={org} />
-        </TabsContent>
-        <TabsContent value="scheduling" className="mt-6">
-          <SchedulingForm orgId={orgId} settings={settings} />
-        </TabsContent>
-        <TabsContent value="platforms" className="mt-6">
-          <PlatformSelector
-            orgId={orgId}
-            activePlatforms={platforms?.map((p) => p.platform_id) ?? []}
-          />
-        </TabsContent>
-        <TabsContent value="topics" className="mt-6">
-          <TopicsManager orgId={orgId} topics={topics ?? []} />
-        </TabsContent>
-        <TabsContent value="tags" className="mt-6">
-          <TagsManager orgId={orgId} tags={tags ?? []} />
-        </TabsContent>
-        <TabsContent value="members" className="mt-6">
-          <MembersList orgId={orgId} members={enrichedMembers as import('@/lib/types').OrganizationMember[]} />
-        </TabsContent>
-      </Tabs>
+
+      <OrgDetailsForm orgId={orgId} org={org} />
+
+      <Separator className="bg-[var(--border-subtle)]" />
+
+      <SchedulingForm orgId={orgId} settings={settings} />
+
+      <Separator className="bg-[var(--border-subtle)]" />
+
+      <PlatformSelector
+        orgId={orgId}
+        activePlatforms={platforms?.map((p) => p.platform_id) ?? []}
+      />
+
+      <Separator className="bg-[var(--border-subtle)]" />
+
+      <TopicsManager orgId={orgId} topics={topics ?? []} />
+
+      <Separator className="bg-[var(--border-subtle)]" />
+
+      <TagsManager orgId={orgId} tags={tags ?? []} />
+
+      <Separator className="bg-[var(--border-subtle)]" />
+
+      <MembersList orgId={orgId} members={enrichedMembers as import('@/lib/types').OrganizationMember[]} />
     </div>
   )
 }
