@@ -3,65 +3,108 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 18 85% 49%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 18 85% 49%;
-    --radius: 0.5rem;
-    --chart-1: 18 85% 49%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    /* Surfaces */
+    --surface-chrome: #121214;
+    --surface-page: #1A1A1E;
+    --surface-card: #1F1F24;
+    --surface-active: #28282E;
+
+    /* Borders */
+    --border-primary: #2A2A2E;
+    --border-subtle: #242428;
+    --border-chrome: #303036;
+
+    /* Accent */
+    --accent-primary: #F0522A;
+    --accent-subtle: rgba(240,82,42, 0.08);
+    --accent-muted: rgba(240,82,42, 0.14);
+    --accent-wash: rgba(240,82,42, 0.06);
+
+    /* Text */
+    --text-primary: #F2F2F2;
+    --text-secondary: #D0D0D0;
+    --text-body: #A0A0A6;
+    --text-muted: #8A8A90;
+    --text-label: #70707A;
+    --text-hint: #606068;
+
+    /* Data Visualization */
+    --data-series-1: #F0522A;
+    --data-series-2: #C43828;
+    --data-series-3: #F07A3A;
+    --data-series-4: #D44E2E;
+    --data-series-5: #F09A50;
+
+    /* Semantic */
+    --semantic-positive: #4EC49A;
+    --semantic-negative: #E24040;
+
+    /* Interactive */
+    --hover-surface: rgba(255,255,255, 0.04);
+    --focus-ring: #F0522A;
+
+    /* Bridge: map shadcn utility names to new tokens so existing Tailwind classes work */
+    --background: var(--surface-page);
+    --foreground: var(--text-primary);
+    --card: var(--surface-card);
+    --card-foreground: var(--text-secondary);
+    --popover: var(--surface-card);
+    --popover-foreground: var(--text-secondary);
+    --primary: var(--accent-primary);
+    --primary-foreground: #F2F2F2;
+    --secondary: var(--surface-active);
+    --secondary-foreground: var(--text-body);
+    --muted: var(--surface-active);
+    --muted-foreground: var(--text-muted);
+    --accent: var(--surface-active);
+    --accent-foreground: var(--text-primary);
+    --destructive: var(--semantic-negative);
+    --destructive-foreground: #F2F2F2;
+    --border: var(--border-primary);
+    --input: var(--border-subtle);
+    --ring: var(--accent-primary);
+    --radius: 0.75rem;
+
+    /* Chart bridge */
+    --chart-1: var(--data-series-1);
+    --chart-2: var(--data-series-2);
+    --chart-3: var(--data-series-3);
+    --chart-4: var(--data-series-4);
+    --chart-5: var(--data-series-5);
   }
 }
 
 @theme inline {
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-  --color-chart-1: hsl(var(--chart-1));
-  --color-chart-2: hsl(var(--chart-2));
-  --color-chart-3: hsl(var(--chart-3));
-  --color-chart-4: hsl(var(--chart-4));
-  --color-chart-5: hsl(var(--chart-5));
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, monospace;
 }
 
 @layer base {
@@ -70,6 +113,5 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: Arial, Helvetica, sans-serif;
   }
 }
