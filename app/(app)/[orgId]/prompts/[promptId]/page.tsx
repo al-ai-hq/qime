@@ -4,9 +4,9 @@ import { Pencil } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/layout/page-header'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { RunButton } from '@/components/prompts/run-button'
-import { PromptRunTable } from '@/components/prompts/prompt-run-table'
+import { PromptDetailView } from '@/components/prompts/prompt-detail-view'
 
 export const metadata = { title: 'Prompt Detail - Qime' }
 
@@ -57,57 +57,41 @@ export default async function PromptDetailPage({
         title={prompt.title}
         action={
           <div className="flex gap-2">
-            <RunButton orgId={orgId} promptId={promptId} />
-            <Link
-              href={`/${orgId}/prompts/${promptId}/edit`}
-              className="inline-flex h-9 items-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium hover:bg-accent"
-            >
-              <Pencil className="h-4 w-4" />
-              Edit
+            <Link href={`/${orgId}/prompts/${promptId}/edit`}>
+              <Button variant="ghost" size="sm" className="gap-2">
+                <Pencil className="h-4 w-4" />
+                Edit
+              </Button>
             </Link>
+            <RunButton orgId={orgId} promptId={promptId} />
           </div>
         }
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 text-sm">
-          <div>
-            <span className="font-medium">Prompt text:</span>
-            <p className="mt-1 whitespace-pre-wrap text-muted-foreground" dir="auto">
-              {prompt.prompt_text}
-            </p>
-          </div>
-          <div className="flex gap-4">
-            <div>
-              <span className="font-medium">Status: </span>
-              <Badge variant={prompt.is_active ? 'default' : 'secondary'}>
-                {prompt.is_active ? 'Active' : 'Paused'}
-              </Badge>
-            </div>
-            {prompt.topics?.name && (
-              <div>
-                <span className="font-medium">Topic: </span>
-                <span className="text-muted-foreground">{prompt.topics.name}</span>
-              </div>
-            )}
-          </div>
-          {prompt.prompt_tags && prompt.prompt_tags.length > 0 && (
-            <div className="flex items-center gap-2">
-              <span className="font-medium">Tags:</span>
-              {prompt.prompt_tags.map((pt) => (
-                <Badge key={pt.tag_id} variant="outline" className="text-xs">
-                  {pt.tags?.name}
-                </Badge>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Prompt info */}
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge variant={prompt.is_active ? 'default' : 'secondary'}>
+          {prompt.is_active ? 'Active' : 'Paused'}
+        </Badge>
+        {prompt.topics?.name && (
+          <Badge variant="outline">{prompt.topics.name}</Badge>
+        )}
+        {prompt.prompt_tags?.map((pt) => (
+          <Badge key={pt.tag_id} variant="outline" className="text-xs">
+            {pt.tags?.name}
+          </Badge>
+        ))}
+      </div>
 
-      <PromptRunTable runs={runs ?? []} competitorMap={competitorMap} />
+      {/* Prompt text */}
+      <div className="rounded-xl border border-[var(--border-primary)] bg-[var(--surface-card)] p-4">
+        <p className="text-sm text-[var(--text-body)] whitespace-pre-wrap" dir="auto">
+          {prompt.prompt_text}
+        </p>
+      </div>
+
+      {/* Split view for runs */}
+      <PromptDetailView runs={runs ?? []} competitorMap={competitorMap} />
     </div>
   )
 }
