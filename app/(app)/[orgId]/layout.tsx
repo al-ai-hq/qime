@@ -1,9 +1,8 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { OrgProvider } from '@/components/providers/org-provider'
-import { Sidebar } from '@/components/layout/sidebar'
-import { TopBar } from '@/components/layout/top-bar'
-import { MobileNav } from '@/components/layout/mobile-nav'
+import { UserProvider } from '@/components/providers/user-provider'
+import { OrgShell } from '@/components/layout/org-shell'
 
 export default async function OrgLayout({
   children,
@@ -38,17 +37,12 @@ export default async function OrgLayout({
   if (!org) notFound()
 
   return (
-    <OrgProvider org={org}>
-      <div className="flex h-screen">
-        <Sidebar orgId={orgId} orgName={org.name} className="hidden md:flex" />
-        <div className="flex flex-1 flex-col overflow-hidden">
-          <TopBar orgName={org.name} userEmail={user.email!} />
-          <main className="flex-1 overflow-y-auto p-6">
-            {children}
-          </main>
-        </div>
-        <MobileNav orgId={orgId} />
-      </div>
-    </OrgProvider>
+    <UserProvider user={{ id: user.id, email: user.email!, full_name: user.user_metadata?.full_name }}>
+      <OrgProvider org={org}>
+        <OrgShell orgId={orgId} userEmail={user.email!}>
+          {children}
+        </OrgShell>
+      </OrgProvider>
+    </UserProvider>
   )
 }
